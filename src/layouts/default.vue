@@ -8,9 +8,9 @@ import TopNavbar from "@/components/navbar/top.vue";
 <template>
   <el-container class="min-h-screen">
     <SideNavbar />
-    <el-container class="pl-[300px] flex flex-col">
+    <el-container class="flex !flex-col">
       <TopNavbar />
-      <el-main class="pt-[60px]! min-w-full">
+      <el-main>
         <RouterView />
       </el-main>
     </el-container>

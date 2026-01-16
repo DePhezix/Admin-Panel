@@ -2,11 +2,13 @@
 import { ref, reactive } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useAuthStore } from "@/stores/auth";
+import { EditPen, Delete } from "@element-plus/icons-vue";
+import { useOrganizationsStore } from "@/stores/organizations";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
   name: String,
-  activity_id: String,
-  org_id: String,
+  id: String,
 });
 
 interface formType {
@@ -14,23 +16,20 @@ interface formType {
   orgName: string;
 }
 
-const tempOrg: { [key: number]: string } = {
-  1: "Akfa",
-  2: "CAU",
-};
-
+const route = useRoute()
 const authStore = useAuthStore();
+const organizationsStore = useOrganizationsStore();
 
 const editOpen = ref<boolean>(false);
-const orgName = ref<string>(tempOrg[Number(props.org_id)] ?? "");
+const orgName: string | undefined = route.query.organization ? organizationsStore.findOrganization(route.query.organization)?.name : undefined;
 const form = reactive<formType>({
   name: props.name ?? "",
-  orgName: orgName.value ?? "",
+  orgName: orgName ?? "",
 });
 
 const resetForm = () => {
   form.name = props.name ?? "";
-  form.orgName = orgName.value ?? "";
+  form.orgName = orgName ?? "";
 };
 
 const handleClose = () => {
@@ -38,9 +37,14 @@ const handleClose = () => {
   resetForm();
 };
 
+const handleEdit = (event: Event) => {
+  event.stopPropagation();
+  editOpen.value = true;
+};
+
 const deleteActivity = () => {
   ElMessageBox.confirm(
-    `You are attempting to delete activity  #${props.activity_id}. Continue?`,
+    `You are attempting to delete activity  #${props.id}. Continue?`,
     "Warning",
     {
       confirmButtonText: "OK",
@@ -64,29 +68,17 @@ const deleteActivity = () => {
 </script>
 
 <template>
-  <el-card shadow="hover" class="min-w-[350px]">
-    <el-descriptions label-width="120px" :column="1" border :title="`Activity #${activity_id}`">
-      <el-descriptions-item>
-        <template #label> Activity Name: </template>
-        {{ name }}
-      </el-descriptions-item>
-      <el-descriptions-item>
-        <template #label> Organization: </template>
-        {{ orgName }}
-      </el-descriptions-item>
-    </el-descriptions>
-
-    <template #footer v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'">
-      <el-button-group class="flex w-full justify-center">
-        <el-button type="primary" class="w-1/2" @click="editOpen = true"> Edit </el-button>
-        <el-button type="danger" class="w-1/2" plain @click="deleteActivity"> Delete </el-button>
-      </el-button-group>
-    </template>
-  </el-card>
-  <el-dialog v-model="editOpen" title="Edit Activity" :before-close="handleClose">
+  <el-button-group
+    direction="horizontal"
+    v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
+  >
+    <el-button :icon="EditPen" @click="handleEdit" />
+    <el-button :icon="Delete" type="danger" @click="deleteActivity" />
+  </el-button-group>
+  <el-dialog v-model="editOpen" title="Edit Activity" :before-close="handleClose" append-to-body>
     <el-form :model="form" label-width="150px">
       <el-form-item label="Activity ID">
-        <el-input :value="activity_id" disabled>
+        <el-input :value="id" disabled>
           <template #prefix>#</template>
         </el-input>
       </el-form-item>
@@ -96,10 +88,10 @@ const deleteActivity = () => {
       <el-form-item label="Organization">
         <el-select v-model="form.orgName">
           <el-option
-            v-for="(item, index) in Object.values(tempOrg)"
+            v-for="(item, index) in organizationsStore.organizations"
             :key="index"
-            :label="item"
-            :value="item"
+            :label="item.name"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>

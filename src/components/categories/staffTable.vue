@@ -1,0 +1,94 @@
+<script setup lang="ts">
+import { watch } from "vue";
+import { useStaffStore } from "@/stores/staff";
+import { useOrganizationsStore } from "@/stores/organizations";
+import { useRoute, useRouter } from "vue-router";
+import StaffActions from "../staff/staffActions.vue";
+
+interface rowEvent extends Event {
+  active: boolean;
+  id: string;
+  name: string;
+}
+
+const route = useRoute();
+const router = useRouter();
+const orgazinationsStore = useOrganizationsStore();
+const staffStore = useStaffStore();
+
+staffStore.setCurrentPage(Number(route.query.page) || 1);
+
+const currentOrganization = route.query.organization
+  ? orgazinationsStore.findOrganization(route.query.organization)?.name
+  : undefined;
+
+watch(
+  () => route.query.page,
+  (newPage) => {
+    staffStore.setCurrentPage(Number(newPage) || 1);
+  }
+);
+
+const handlePageChange = (page: number) => {
+  router.push({
+    query: {
+      ...route.query,
+      page: String(page),
+    },
+  });
+};
+
+const handleRowClick = (e: rowEvent) => {
+  router.push({
+    query: {
+      category: route.query.category,
+      organization: route.query.organization,
+      staff: e.id,
+    },
+  });
+};
+</script>
+
+<template>
+  <div class="w-full flex flex-col items-center min-h-full">
+    <el-table
+      :data="staffStore.displayedStaff"
+      @row-click="handleRowClick"
+      class="[&_tbody]:cursor-pointer"
+    >
+      <el-table-column label="Organization">
+        <template #default="scope">
+          <el-text>
+            {{ currentOrganization }}
+          </el-text>
+        </template>
+      </el-table-column>
+      <el-table-column prop="name" label="Name" />
+      <el-table-column prop="surname" label="Surname" />
+      <el-table-column prop="id" label="Staff ID" show-overflow-tooltip />
+      <el-table-column
+        fixed="right"
+        header-align="right"
+        align="right"
+        min-width="120"
+        label="Actions"
+      >
+        <template #default="scope">
+          <StaffActions
+            :name="scope.row.name"
+            :surname="scope.row.surname"
+            :worker_id="scope.row.id"
+          />
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      layout="prev, pager, next"
+      class="mt-auto"
+      :total="staffStore.staff.length"
+      :page-size="staffStore.pageSize"
+      v-model:current-page="staffStore.currentPage"
+      @current-change="handlePageChange"
+    />
+  </div>
+</template>

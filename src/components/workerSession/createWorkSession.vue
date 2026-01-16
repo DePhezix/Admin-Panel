@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
+import { useSessionsStore } from "@/stores/sessions";
 import type { FormInstance, FormRules } from "element-plus";
 
 interface formType {
@@ -11,18 +12,7 @@ interface formType {
 
 const dialogVisible = defineModel();
 
-const tempWork: { [key: number]: string } = {
-  1: "John Doe",
-  2: "Jane Doe",
-};
-const tempActivity: { [key: number]: string } = {
-  1: "TV assembly",
-  2: "Phone assembly",
-};
-const tempEquipment: { [key: number]: string } = {
-  1: "Lenovo Think Pad T120",
-  2: "Macbook Air M3",
-};
+const sessionStore = useSessionsStore();
 
 const formRef = ref<FormInstance>();
 const form = reactive<formType>({
@@ -79,30 +69,30 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       <el-form-item label="Staff Name" prop="workerName">
         <el-select v-model="form.workerName">
           <el-option
-            v-for="(item, index) in Object.values(tempWork)"
+            v-for="(item, index) in sessionStore.displayedSessions"
             :key="index"
-            :label="item"
-            :value="item"
+            :label="item.worker"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
       <el-form-item label="Activity" prop="activityName">
         <el-select v-model="form.activityName">
           <el-option
-            v-for="(item, index) in Object.values(tempActivity)"
+            v-for="(item, index) in sessionStore.displayedSessions"
             :key="index"
-            :label="item"
-            :value="item"
+            :label="item.activity"
+            :value="item.activity"
           />
         </el-select>
       </el-form-item>
       <el-form-item label="Equipment" prop="equipmentName">
         <el-select v-model="form.equipmentName">
           <el-option
-            v-for="(item, index) in Object.values(tempEquipment)"
+            v-for="(item, index) in sessionStore.displayedSessions"
             :key="index"
-            :label="item"
-            :value="item"
+            :label="item.equipment"
+            :value="item.equipment"
           />
         </el-select>
       </el-form-item>

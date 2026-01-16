@@ -1,30 +1,21 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-type sideNavigationType =
-  | "categories"
-  | "organizations"
-  | "staff"
-  | "activity"
-  | "staff activity"
-  | "worker session"
-  | "analytics"
-  | "health check";
+type sideNavigationType = "dashboard" | "categories" | "equipment" | "sessions" | "settings";
 
 const sideNavigationArr: sideNavigationType[] = [
+  "dashboard",
   "categories",
-  "organizations",
-  "staff",
-  "activity",
-  "staff activity",
-  "worker session",
-  "analytics",
-  "health check",
+  "equipment",
+  "sessions",
+  "settings",
 ];
 
 const route = useRoute();
 const router = useRouter();
+
+const collapsedNav = ref<boolean>(false);
 
 const currentNavIdx = computed<number>(() => {
   const currentPath = route.path.split("_").join(" ").slice(1);
@@ -40,20 +31,46 @@ const handleChange = (newNavIdx: string) => {
     router.push(newNav);
   }
 };
-
 </script>
 <template>
-  <el-aside class="fixed">
+  <el-aside :class="{ '!w-min': collapsedNav }">
     <el-scrollbar>
-      <el-menu class="h-screen" :default-active="String(currentNavIdx)" @select="handleChange">
-        <el-menu-item index="0">Categories</el-menu-item>
-        <el-menu-item index="1">Organizations</el-menu-item>
-        <el-menu-item index="2">Staff</el-menu-item>
-        <el-menu-item index="3">Activity</el-menu-item>
-        <el-menu-item index="4">Staff Activity</el-menu-item>
-        <el-menu-item index="5">Worker Sessions</el-menu-item>
-        <el-menu-item index="6">Analytics</el-menu-item>
-        <el-menu-item index="7">Health Check</el-menu-item>
+      <el-menu
+        class="h-screen flex flex-col"
+        :collapse="collapsedNav"
+        :default-active="String(currentNavIdx)"
+        @select="handleChange"
+      >
+        <h1
+          class="flex justify-between px-[20px] py-[10px] items-center"
+          :class="{ 'justify-center py-[0]': collapsedNav }"
+        >
+          <span :class="{ hidden: collapsedNav }"> HUMAID </span>
+          <el-icon class="cursor-pointer" @click="collapsedNav = !collapsedNav"
+            ><Fold v-if="!collapsedNav" /><Expand v-else
+          /></el-icon>
+        </h1>
+        <div class="flex-1">
+          <el-menu-item index="0">
+            <el-icon><DataLine /></el-icon>
+            <template #title>Dashboard</template>
+          </el-menu-item>
+          <el-menu-item index="1">
+            <el-icon><Document /></el-icon>
+            <template #title>Categories</template>
+          </el-menu-item>
+          <el-menu-item index="2">
+            <el-icon><TakeawayBox /></el-icon>
+            <template #title>Equipment</template>
+          </el-menu-item>
+          <el-menu-item index="3">
+            <el-icon><Suitcase /></el-icon>
+            <template #title>Sessions</template>
+          </el-menu-item>
+        </div>
+        <el-menu-item index="4">
+          <el-icon><setting /></el-icon><template #title>Settings</template></el-menu-item
+        >
       </el-menu>
     </el-scrollbar>
   </el-aside>

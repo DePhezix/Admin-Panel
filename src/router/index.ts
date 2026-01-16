@@ -12,40 +12,20 @@ const routes = [
     component: () => import("@/layouts/default.vue"),
     meta: { requiresAuth: true },
     children: [
-      { path: "", redirect: "/categories" },
+      { path: "", redirect: "/dashboard" },
       {
-        path: "activity",
-        name: "activity",
-        component: () => import("@/views/activity.vue"),
+        path: "dashboard",
+        name: "dashboard",
+        component: () => import("@/views/dashboard.vue"),
       },
       {
-        path: "analytics",
-        name: "analytics",
-        component: () => import("@/views/analytics.vue"),
+        path: "settings",
+        name: "settings",
+        component: () => import("@/views/settings.vue"),
       },
       {
-        path: "health_check",
-        name: "healthCheck",
-        component: () => import("@/views/healthCheck.vue"),
-      },
-      {
-        path: "organizations",
-        name: "organizations",
-        component: () => import("@/views/organizations.vue"),
-      },
-      {
-        path: "staff",
-        name: "staff",
-        component: () => import("@/views/staff.vue"),
-      },
-      {
-        path: "staff_activity",
-        name: "staffActivity",
-        component: () => import("@/views/staffActivity.vue"),
-      },
-      {
-        path: "worker_session",
-        name: "workerSession",
+        path: "sessions",
+        name: "sessions",
         component: () => import("@/views/workerSession.vue"),
       },
       {
@@ -53,6 +33,11 @@ const routes = [
         name: "categories",
         component: () => import("@/views/categories.vue"),
       },
+      {
+        path: "equipment",
+        name: "equipment",
+        component: () => import("@/views/healthCheck.vue")
+      }
     ],
   },
 ];
@@ -60,6 +45,9 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: routes,
+  scrollBehavior() {
+    return { top: 0, behavior: "smooth" };
+  },
 });
 
 router.beforeEach((to, from, next) => {
@@ -68,7 +56,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next("/login");
   } else if (to.path === "/login" && authStore.isAuthenticated) {
-    next("/categories");
+    next("/dashboard");
   } else {
     next();
   }

@@ -1,40 +1,40 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, EditPen } from "@element-plus/icons-vue";
+import { useRoute } from "vue-router";
+
 import { useAuthStore } from "@/stores/auth";
+import { useOrganizationsStore } from "@/stores/organizations";
 
 const props = defineProps({
   worker_id: String,
   name: String,
   surname: String,
-  org_id: String,
 });
 
 interface formType {
   workerName: string;
   workerSurname: string;
-  orgName: string;
+  orgName: string | undefined;
 }
 
-const tempOrg: { [key: number]: string } = {
-  1: "Akfa",
-  2: "CAU",
-};
-
+const route = useRoute()
 const authStore = useAuthStore();
+const organizationStore = useOrganizationsStore()
+const orgName = route.query.organization ? organizationStore.findOrganization(route.query.organization)?.name : ""
 
 const editOpen = ref<boolean>(false);
-const orgName = ref<string>(tempOrg[Number(props.org_id)] ?? "");
 const form = reactive<formType>({
   workerName: props.name ?? "",
   workerSurname: props.surname ?? "",
-  orgName: orgName.value ?? "",
+  orgName: orgName ,
 });
 
 const resetForm = () => {
   form.workerName = props.name ?? "";
   form.workerSurname = props.surname ?? "";
-  form.orgName = orgName.value ?? "";
+  form.orgName = orgName;
 };
 
 const handleClose = () => {
@@ -42,7 +42,8 @@ const handleClose = () => {
   resetForm();
 };
 
-const deleteStaffID = () => {
+const deleteStaff = (e: Event) => {
+  e.stopPropagation();
   ElMessageBox.confirm(
     `You are attempting to delete staff #${props.worker_id}. Continue?`,
     "Warning",
@@ -65,33 +66,22 @@ const deleteStaffID = () => {
       });
     });
 };
+
+const handleEdit = (event: Event) => {
+  event.stopPropagation();
+  editOpen.value = true;
+};
 </script>
 
 <template>
-  <el-card shadow="hover" class="min-w-[350px]">
-    <el-descriptions label-width="120px" :column="1" border :title="`Staff #${worker_id}`">
-      <el-descriptions-item>
-        <template #label> Name: </template>
-        {{ props.name }}
-      </el-descriptions-item>
-      <el-descriptions-item>
-        <template #label> Surname: </template>
-        {{ props.surname }}
-      </el-descriptions-item>
-      <el-descriptions-item>
-        <template #label> Organization: </template>
-        {{ orgName }}
-      </el-descriptions-item>
-    </el-descriptions>
-
-    <template #footer v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'">
-      <el-button-group class="flex w-full justify-center">
-        <el-button type="primary" class="w-1/2" @click="editOpen = true"> Edit </el-button>
-        <el-button type="danger" class="w-1/2" plain @click="deleteStaffID()"> Delete </el-button>
-      </el-button-group>
-    </template>
-  </el-card>
-  <el-dialog v-model="editOpen" title="Edit Staff" :before-close="handleClose">
+  <el-button-group
+    direction="horizontal"
+    v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
+  >
+    <el-button :icon="EditPen" @click="handleEdit" />
+    <el-button :icon="Delete" type="danger" @click="deleteStaff" />
+  </el-button-group>
+  <el-dialog v-model="editOpen" title="Edit Staff" :before-close="handleClose" append-to-body>
     <el-form :model="form" label-width="150px">
       <el-form-item label="Staff ID">
         <el-input :value="worker_id" disabled>
@@ -107,10 +97,10 @@ const deleteStaffID = () => {
       <el-form-item label="Organization">
         <el-select v-model="form.orgName">
           <el-option
-            v-for="(item, index) in Object.values(tempOrg)"
+            v-for="(item, index) in organizationStore.organizations"
             :key="index"
-            :label="item"
-            :value="item"
+            :label="item.name"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>

@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
 import type { FormInstance, FormRules } from "element-plus";
+import { Lock, Message } from "@element-plus/icons-vue";
 
 interface LoginForm {
   email: string;
@@ -19,7 +20,7 @@ const formRef = ref<FormInstance>();
 const form = reactive<LoginForm>({
   email: "",
   password: "",
-  userType: "other",
+  userType: "admin",
 });
 
 const rules = reactive<FormRules<LoginForm>>({
@@ -49,7 +50,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid) => {
     if (valid) {
       authStore.setUserRole(form.userType)
-      router.replace("/categories");
+      router.replace("/dashboard");
     }
   });
 };
@@ -57,33 +58,37 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
 <template>
   <el-main class="w-full h-screen flex! justify-center pt-[10%]!">
-    <el-form
-      ref="formRef"
-      :rules="rules"
-      :model="form"
-      class="w-[400px] flex flex-col"
-      scrollToError
-      hide-required-asterisk
-      label-position="top"
-    >
-      <el-form-item label="Email:" prop="email">
-        <el-input v-model="form.email" placeholder="Enter Email" class="h-[30px]" type="email" />
-      </el-form-item>
-      <el-form-item label="Password:" prop="password">
-        <el-input
-          v-model="form.password"
-          placeholder="Enter Password"
-          class="h-[30px]"
-          type="password"
-          show-password
-        />
-      </el-form-item>
-      <el-radio-group v-model="form.userType">
-        <el-radio value="admin">Admin</el-radio>
-        <el-radio value="agent">Agent</el-radio>
-        <el-radio value="other">Other</el-radio>
-      </el-radio-group>
-      <el-button @click="submitForm(formRef)">Login</el-button>
-    </el-form>
+    <el-card shadow="hover" class="h-min">
+      <template #header>
+        <div class="flex items-center justify-between">
+          <h1 style="font-weight: 600">LOGIN</h1>
+          <p>login to your account</p>
+        </div>
+      </template>
+      <el-form
+        ref="formRef"
+        :rules="rules"
+        :model="form"
+        class="w-[400px] flex flex-col"
+        scrollToError
+        hide-required-asterisk
+        label-position="top"
+      >
+        <el-form-item label="Email:" prop="email">
+          <el-input v-model="form.email" placeholder="Enter Email" class="h-[40px]" type="email" :prefix-icon="Message" />
+        </el-form-item>
+        <el-form-item label="Password:" prop="password">
+          <el-input
+            v-model="form.password"
+            placeholder="Enter Password"
+            class="h-[40px]"
+            type="password"
+            show-password
+            :prefix-icon="Lock"
+          />
+        </el-form-item>
+        <el-button type="primary" class="!h-[40px]" @click="submitForm(formRef)">Login</el-button>
+      </el-form>
+    </el-card>
   </el-main>
 </template>
