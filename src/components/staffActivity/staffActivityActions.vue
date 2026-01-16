@@ -4,7 +4,6 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { EditPen, Delete } from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
 
-import { useAuthStore } from "@/stores/auth";
 import { useStaffStore } from "@/stores/staff";
 import { useOrganizationsStore } from "@/stores/organizations";
 
@@ -21,7 +20,6 @@ interface formType {
 
 const route = useRoute()
 
-const authStore = useAuthStore();
 const staffStore = useStaffStore();
 const organizationStore = useOrganizationsStore();
 
@@ -80,7 +78,6 @@ const deleteStaffActivity = () => {
 <template>
   <el-button-group
     direction="horizontal"
-    v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
   >
     <el-button :icon="EditPen" @click="handleEdit" />
     <el-button :icon="Delete" type="danger" @click="deleteStaffActivity" />

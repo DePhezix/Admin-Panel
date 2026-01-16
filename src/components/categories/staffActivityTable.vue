@@ -5,14 +5,17 @@ import { useRoute, useRouter } from "vue-router";
 import { useStaffActivityStore } from "@/stores/staffActivity";
 import { useStaffStore } from "@/stores/staff";
 import { useOrganizationsStore } from "@/stores/organizations";
+import { useAuthStore } from "@/stores/auth";
 
 import StaffActivityActions from "../staffActivity/staffActivityActions.vue";
 
 const route = useRoute();
 const router = useRouter();
+
 const orgazinationsStore = useOrganizationsStore();
 const staffStore = useStaffStore();
 const staffActivityStore = useStaffActivityStore();
+const authStore = useAuthStore();
 
 staffActivityStore.setCurrentPage(Number(route.query.page) || 1);
 
@@ -67,6 +70,7 @@ const handlePageChange = (page: number) => {
         align="right"
         min-width="120"
         label="Actions"
+        v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
       >
         <template #default="scope">
           <StaffActivityActions

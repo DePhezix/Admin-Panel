@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { useAuthStore } from "@/stores/auth";
 import { EditPen, Delete } from "@element-plus/icons-vue";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useRoute } from "vue-router";
@@ -17,7 +16,6 @@ interface formType {
 }
 
 const route = useRoute()
-const authStore = useAuthStore();
 const organizationsStore = useOrganizationsStore();
 
 const editOpen = ref<boolean>(false);
@@ -70,7 +68,6 @@ const deleteActivity = () => {
 <template>
   <el-button-group
     direction="horizontal"
-    v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
   >
     <el-button :icon="EditPen" @click="handleEdit" />
     <el-button :icon="Delete" type="danger" @click="deleteActivity" />

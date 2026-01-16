@@ -4,7 +4,6 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, EditPen } from "@element-plus/icons-vue";
 
 import { useRoute } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
 import { useCategoriesStore } from "@/stores/categories";
 
 const props = defineProps({
@@ -18,7 +17,6 @@ interface formType {
 }
 
 const route = useRoute();
-const authStore = useAuthStore();
 const categoriesStores = useCategoriesStore();
 
 const currentCategory = route.query.category
@@ -74,7 +72,7 @@ const handleEdit = (event: Event) => {
 </script>
 
 <template>
-  <el-button-group direction="horizontal" v-if="authStore.userRole === 'admin'">
+  <el-button-group direction="horizontal">
     <el-button :icon="EditPen" @click="handleEdit" />
     <el-button :icon="Delete" type="danger" @click="deleteOrganization" />
   </el-button-group>

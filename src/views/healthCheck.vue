@@ -24,7 +24,7 @@ const getStatusType = (status: statusTypes) => {
 </script>
 
 <template>
-  <div class="flex justify-center pt-[10%]">
+  <div class="flex justify-center pt-[10vh]">
     <el-card shadow="hover" class="w-[600px]">
       <template #header>
         <div class="flex items-center justify-between">

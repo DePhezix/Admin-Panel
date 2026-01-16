@@ -2,6 +2,7 @@
 import { watch } from "vue";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useCategoriesStore } from "@/stores/categories";
+import { useAuthStore } from "@/stores/auth";
 import { useRoute, useRouter } from "vue-router";
 import OrganizationActions from "../organizations/organizationActions.vue";
 
@@ -15,6 +16,7 @@ const route = useRoute();
 const router = useRouter();
 const orgazinationsStore = useOrganizationsStore();
 const categoriesStore = useCategoriesStore();
+const authStore = useAuthStore()
 
 orgazinationsStore.setCurrentPage(Number(route.query.page) || 1);
 
@@ -75,6 +77,7 @@ const handleRowClick = (e: rowEvent) => {
         align="right"
         min-width="120"
         label="Actions"
+        v-if="authStore.userRole === 'admin'"
       >
         <template #default="scope">
           <OrganizationActions :name="scope.row.name" :org_id="scope.row.id" />

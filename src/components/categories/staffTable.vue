@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { watch } from "vue";
 import { useStaffStore } from "@/stores/staff";
+import { useAuthStore } from "@/stores/auth";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useRoute, useRouter } from "vue-router";
 import StaffActions from "../staff/staffActions.vue";
@@ -15,6 +16,7 @@ const route = useRoute();
 const router = useRouter();
 const orgazinationsStore = useOrganizationsStore();
 const staffStore = useStaffStore();
+const authStore = useAuthStore()
 
 staffStore.setCurrentPage(Number(route.query.page) || 1);
 
@@ -72,6 +74,7 @@ const handleRowClick = (e: rowEvent) => {
         align="right"
         min-width="120"
         label="Actions"
+        v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
       >
         <template #default="scope">
           <StaffActions

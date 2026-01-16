@@ -2,19 +2,15 @@
 import { watch } from "vue";
 import { useActivitiesStore } from "@/stores/activities";
 import { useOrganizationsStore } from "@/stores/organizations";
+import { useAuthStore } from "@/stores/auth";
 import { useRoute, useRouter } from "vue-router";
 import ActivityActions from "../activity/activityActions.vue";
-
-interface rowEvent extends Event {
-  active: boolean;
-  id: string;
-  name: string;
-}
 
 const route = useRoute();
 const router = useRouter();
 const orgazinationsStore = useOrganizationsStore();
 const activitiesStore = useActivitiesStore();
+const authStore = useAuthStore()
 
 activitiesStore.setCurrentPage(Number(route.query.page) || 1);
 
@@ -57,6 +53,7 @@ const handlePageChange = (page: number) => {
         align="right"
         min-width="120"
         label="Actions"
+        v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
       >
         <template #default="scope">
           <ActivityActions :name="scope.row.name" :id="scope.row.id" />
