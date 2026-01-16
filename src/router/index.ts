@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import Cookies from "js-cookie";
 
 const routes = [
   {
@@ -36,8 +37,8 @@ const routes = [
       {
         path: "equipment",
         name: "equipment",
-        component: () => import("@/views/healthCheck.vue")
-      }
+        component: () => import("@/views/healthCheck.vue"),
+      },
     ],
   },
 ];
@@ -50,8 +51,12 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+
+  if (!authStore.userRole && Cookies.get("token")) {
+    await authStore.initAuth();
+  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next("/login");

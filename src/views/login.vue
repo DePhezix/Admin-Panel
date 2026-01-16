@@ -9,7 +9,6 @@ import { Lock, Message } from "@element-plus/icons-vue";
 interface LoginForm {
   email: string;
   password: string;
-  userType: "admin" | "agent" | "other"; //temp
 }
 
 const router = useRouter();
@@ -20,7 +19,6 @@ const formRef = ref<FormInstance>();
 const form = reactive<LoginForm>({
   email: "",
   password: "",
-  userType: "admin",
 });
 
 const rules = reactive<FormRules<LoginForm>>({
@@ -49,9 +47,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid) => {
     if (valid) {
-      const response = await authStore.loginUser(form.email, form.password);
+      const response =  await authStore.loginUser(form.email, form.password);
       if (response.access_token) {
-        console.log(response)
         router.replace({ name: "dashboard" });
       }
     }

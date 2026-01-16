@@ -22,10 +22,33 @@ interface userData {
 }
 
 export const useAuthStore = defineStore("auth", () => {
-  const userRole = ref<userTypes>((Cookies.get("role") as userTypes) || null);
+  const userRole = ref<userTypes>(null);
   const token = ref<string | null>(null);
 
   const isAuthenticated = computed<boolean>(() => !!userRole.value);
+
+  async function initAuth() {
+    const savedToken = Cookies.get("token");
+    if (savedToken) {
+      token.value = savedToken;
+      try {
+        const userDataResponse = await axios.get<userData>(
+          "https://crm.humaid.co/api/auth/get-user",
+          {
+            headers: {
+              Authorization: `Bearer ${token.value}`,
+            },
+          }
+        );
+        userRole.value = userDataResponse.data.role;
+      } catch (error) {
+        console.error("Failed to fetch user data during initAuth:", error);
+        token.value = null;
+        userRole.value = null;
+        Cookies.remove("token");
+      }
+    }
+  }
 
   async function loginUser(email: string, password: string) {
     try {
@@ -40,18 +63,14 @@ export const useAuthStore = defineStore("auth", () => {
           Authorization: `Bearer ${token.value}`,
         },
       });
-      setUserRole(userData.data.role);
+
+      userRole.value = userData.data.role;
+      Cookies.set("token", token.value);
+
       return response.data;
     } catch (error) {
       console.error("Login error:", error);
       throw new Error("Failed to login");
-    }
-  }
-
-  function setUserRole(updatedRole: userTypes) {
-    userRole.value = updatedRole;
-    if (updatedRole) {
-      Cookies.set("role", updatedRole, { expires: 7 });
     }
   }
 
@@ -63,8 +82,8 @@ export const useAuthStore = defineStore("auth", () => {
   return {
     isAuthenticated,
     userRole,
-    setUserRole,
     signOutUser,
     loginUser,
+    initAuth
   };
 });
