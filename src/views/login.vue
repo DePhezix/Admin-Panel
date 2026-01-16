@@ -47,10 +47,13 @@ const rules = reactive<FormRules<LoginForm>>({
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  await formEl.validate((valid) => {
+  await formEl.validate(async (valid) => {
     if (valid) {
-      authStore.setUserRole(form.userType)
-      router.replace("/dashboard");
+      const response = await authStore.loginUser(form.email, form.password);
+      if (response.access_token) {
+        console.log(response)
+        router.replace({ name: "dashboard" });
+      }
     }
   });
 };
@@ -75,7 +78,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         label-position="top"
       >
         <el-form-item label="Email:" prop="email">
-          <el-input v-model="form.email" placeholder="Enter Email" class="h-[40px]" type="email" :prefix-icon="Message" />
+          <el-input
+            v-model="form.email"
+            placeholder="Enter Email"
+            class="h-[40px]"
+            type="email"
+            :prefix-icon="Message"
+          />
         </el-form-item>
         <el-form-item label="Password:" prop="password">
           <el-input
