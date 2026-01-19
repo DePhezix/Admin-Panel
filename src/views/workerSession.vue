@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import WorkSessionActions from "@/components/workerSession/workSessionActions.vue";
 import { useSessionsStore } from "@/stores/sessions";
@@ -25,34 +25,58 @@ const handlePageChange = (page: number) => {
     },
   });
 };
+
+onMounted(async () => {
+  await sessionsStore.fetchSessions();
+});
 </script>
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table :data="sessionsStore.displayedSessions" show-overflow-tooltip class="w-full">
       <el-table-column fixed prop="id" label="Session ID" width="180" />
-      <el-table-column prop="worker" label="Worker" width="200" />
-      <el-table-column prop="activity" label="Activity" width="180" />
-      <el-table-column prop="equipment" label="Equipment" width="180" />
-      <el-table-column prop="agent" label="Agent" width="180" />
-      <el-table-column prop="status" label="Status" width="180">
+      <el-table-column prop="worker.name" label="Worker" width="200" />
+      <el-table-column prop="activity.name" label="Activity" width="180" />
+      <el-table-column prop="equipment_id" label="Equipment ID" width="180">
         <template #default="scope">
-          <el-tag :type="scope.row.status ? 'success' : 'danger'" disable-transitions>
+          <el-text>
+            {{
+              scope.row.equipment_id.toString().startsWith("EQ-")
+                ? scope.row.equipment_id
+                : `EQ-${scope.row.equipment_id.toString().padStart(3, "0")}`
+            }}
+          </el-text>
+        </template>
+      </el-table-column>
+      <el-table-column prop="agent.name" label="Agent" width="180" />
+      <el-table-column prop="active" label="Status" width="180">
+        <template #default="scope">
+          <el-tag :type="scope.row.active ? 'success' : 'danger'" disable-transitions>
             <span class="flex items-center gap-[5px]">
-              <el-icon><CircleCheck v-if="scope.row.status" /><CircleClose v-else /></el-icon>
-              {{ scope.row.status ? "Active" : "Inactive" }}
+              <el-icon><CircleCheck v-if="scope.row.active" /><CircleClose v-else /></el-icon>
+              {{ scope.row.active ? "Active" : "Inactive" }}
             </span>
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="created" label="Created At" width="200" />
-      <el-table-column fixed="right" header-align="right" align="right" min-width="120" label="Actions">
+      <el-table-column prop="created_at" label="Created At" width="200">
+        <template #default="scope">
+          {{ new Date(scope.row.created_at).toLocaleString() }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="right"
+        align="right"
+        min-width="120"
+        label="Actions"
+      >
         <template #default="scope">
           <WorkSessionActions
-            :worker-name="scope.row.worker"
-            :activity-name="scope.row.activity"
-            :equipment-name="scope.row.equipment"
-            :status="scope.row.status"
+            :worker-name="scope.row.worker.name"
+            :activity-name="scope.row.activity.name"
+            :equipment-name="scope.row.equipment_id"
+            :status="scope.row.active"
             :worker-session-id="scope.row.id"
           />
         </template>
@@ -61,7 +85,7 @@ const handlePageChange = (page: number) => {
     <el-pagination
       class="mt-auto"
       layout="prev, pager, next"
-      :total="sessionsStore.filteredSessions.length"
+      :total="sessionsStore.totalSessions"
       :page-size="sessionsStore.pageSize"
       v-model:current-page="sessionsStore.currentPage"
       @current-change="handlePageChange"

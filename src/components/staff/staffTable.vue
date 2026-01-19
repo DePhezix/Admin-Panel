@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useStaffStore } from "@/stores/staff";
 import { useAuthStore } from "@/stores/auth";
 import { useOrganizationsStore } from "@/stores/organizations";
@@ -20,9 +20,8 @@ const authStore = useAuthStore();
 
 staffStore.setCurrentPage(Number(route.query.page) || 1);
 
-const currentOrganization = route.params.organizationId
-  ? orgazinationsStore.findOrganization(route.params.organizationId)?.name
-  : undefined;
+const loading = ref<boolean>(true);
+const currentOrganization = ref<string | undefined>(undefined);
 
 watch(
   () => route.query.page,
@@ -30,6 +29,22 @@ watch(
     staffStore.setCurrentPage(Number(newPage) || 1);
   }
 );
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await Promise.all([
+      staffStore.fetchStaff(route.params.organizationId),
+      route.params.organizationId
+        ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
+            currentOrganization.value = organization?.name;
+          })
+        : Promise.resolve(),
+    ]);
+  } finally {
+    loading.value = false;
+  }
+});
 
 const handlePageChange = (page: number) => {
   router.push({
@@ -54,6 +69,7 @@ const handleRowClick = (e: rowEvent) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table
+      v-loading="loading"
       :data="staffStore.displayedStaff"
       @row-click="handleRowClick"
       class="[&_tbody]:cursor-pointer"
@@ -88,7 +104,7 @@ const handleRowClick = (e: rowEvent) => {
     <el-pagination
       layout="prev, pager, next"
       class="mt-auto"
-      :total="staffStore.staff.length"
+      :total="staffStore.totalStaff"
       :page-size="staffStore.pageSize"
       v-model:current-page="staffStore.currentPage"
       @current-change="handlePageChange"

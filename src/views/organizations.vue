@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { watch } from "vue";
+<script async setup lang="ts">
+import { ref, watch, onMounted } from "vue";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useCategoriesStore } from "@/stores/categories";
 import { useAuthStore } from "@/stores/auth";
@@ -20,9 +20,8 @@ const authStore = useAuthStore();
 
 orgazinationsStore.setCurrentPage(Number(route.query.page) || 1);
 
-const currentCategory = route.params.categoryId
-  ? categoriesStore.findCategory(route.params.categoryId)?.name
-  : undefined;
+const loading = ref(true);
+const currentCategory = ref<string | undefined>(undefined);
 
 watch(
   () => route.query.page,
@@ -30,6 +29,22 @@ watch(
     orgazinationsStore.setCurrentPage(Number(newPage) || 1);
   }
 );
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await Promise.all([
+      orgazinationsStore.fetchOrganizations(route.params.categoryId),
+      route.params.categoryId
+        ? categoriesStore.findCategory(route.params.categoryId).then((category) => {
+            currentCategory.value = category?.name;
+          })
+        : Promise.resolve(),
+    ]);
+  } finally {
+    loading.value = false;
+  }
+});
 
 const handlePageChange = (page: number) => {
   router.push({
@@ -54,6 +69,7 @@ const handleRowClick = (e: rowEvent) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table
+      v-loading="loading"
       :data="orgazinationsStore.displayedOrganizations"
       @row-click="handleRowClick"
       class="[&_tbody]:cursor-pointer"
@@ -88,7 +104,7 @@ const handleRowClick = (e: rowEvent) => {
     <el-pagination
       layout="prev, pager, next"
       class="mt-auto"
-      :total="orgazinationsStore.organizations.length"
+      :total="orgazinationsStore.totalOrganizations"
       :page-size="orgazinationsStore.pageSize"
       v-model:current-page="orgazinationsStore.currentPage"
       @current-change="handlePageChange"

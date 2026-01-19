@@ -86,8 +86,8 @@ const deleteWorkerSession = () => {
           <el-option
             v-for="(item, index) in sessionStore.sessions"
             :key="index"
-            :label="item.worker"
-            :value="item.id"
+            :label="item.worker.name"
+            :value="item.worker.id"
           />
         </el-select>
       </el-form-item>
@@ -96,8 +96,8 @@ const deleteWorkerSession = () => {
           <el-option
             v-for="(item, index) in sessionStore.sessions"
             :key="index"
-            :label="item.activity"
-            :value="item.activity"
+            :label="item.activity.name"
+            :value="item.activity.id"
           />
         </el-select>
       </el-form-item>
@@ -106,8 +106,8 @@ const deleteWorkerSession = () => {
           <el-option
             v-for="(item, index) in sessionStore.sessions"
             :key="index"
-            :label="item.equipment"
-            :value="item.equipment"
+            :label="item.equipment_id"
+            :value="item.equipment_id"
           />
         </el-select>
       </el-form-item>

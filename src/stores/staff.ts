@@ -1,5 +1,8 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { useAuthStore } from "./auth";
+import axios from "axios";
+
 import type { LocationQueryValue } from "vue-router";
 
 interface staffType {
@@ -9,127 +12,77 @@ interface staffType {
   org_id: string;
 }
 
-export const useStaffStore = defineStore("staff", () => {
-  const staff: staffType[] = [
-    {
-      id: "69279c24eae1e195b382120a",
-      name: "Anvar",
-      surname: "Aliyev",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "693a82b43bf72b000174e536",
-      name: "Anvar",
-      surname: "Aliyev",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928d9cf08537c0001274f6e",
-      name: "John",
-      surname: "Doe",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928dd6d08537c0001274f70",
-      name: "Shoshi",
-      surname: "Qanot",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928ddd108537c0001274f71",
-      name: "cvdn",
-      surname: "dnn",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "69279c24eae1e195b382120a",
-      name: "Anvar",
-      surname: "Aliyev",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "693a82b43bf72b000174e536",
-      name: "Anvar",
-      surname: "Aliyev",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928d9cf08537c0001274f6e",
-      name: "John",
-      surname: "Doe",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928dd6d08537c0001274f70",
-      name: "Shoshi",
-      surname: "Qanot",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928ddd108537c0001274f71",
-      name: "cvdn",
-      surname: "dnn",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "69279c24eae1e195b382120a",
-      name: "Anvar",
-      surname: "Aliyev",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "693a82b43bf72b000174e536",
-      name: "Anvar",
-      surname: "Aliyev",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928d9cf08537c0001274f6e",
-      name: "John",
-      surname: "Doe",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928dd6d08537c0001274f70",
-      name: "Shoshi",
-      surname: "Qanot",
-      org_id: "692796dd312469eb67874a7c",
-    },
-    {
-      id: "6928ddd108537c0001274f71",
-      name: "cvdn",
-      surname: "dnn",
-      org_id: "692796dd312469eb67874a7c",
-    },
-  ];
+interface responseType {
+  data: staffType[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
-  const tableHeight = staff.length * 42.2 + 240;
+export const useStaffStore = defineStore("staff", () => {
+  const authStore = useAuthStore();
+
+  const staff = ref<staffType[]>([]);
 
   const currentPage = ref(1);
-  const pageSize = ref<number>(
-    window.innerHeight < tableHeight ? Math.floor(window.innerHeight / 45) - 6: staff.length
-  );
+  const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 6);
+  const pageSizeMultiple = ref<number>(1);
+  const totalStaff = ref<number>(0);
+
+  if (pageSize.value < 50 && pageSize.value >= 1) {
+    while (pageSize.value * pageSizeMultiple.value < 50) {
+      pageSizeMultiple.value++;
+    }
+  }
+
+  const fetchStaff = async (organizationId: string | string[] | undefined) => {
+    const response = await axios.get<responseType>(
+      `https://crm.humaid.co/api/staff?page=${
+        currentPage.value > 1 ? currentPage.value : 1
+      }&limit=${pageSize.value * pageSizeMultiple.value}&org_id=${organizationId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      }
+    );
+
+    totalStaff.value = response.data.total;
+    staff.value = response.data.data;
+  };
 
   const displayedStaff = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
-    return staff.slice(start, end);
+    return staff.value.slice(start, end);
   });
 
   const setCurrentPage = (page: number) => {
     currentPage.value = page;
   };
 
-  function findStaff(staffID: string | LocationQueryValue[]): staffType | undefined {
-    return staff.find((s) => s.id === staffID);
+
+  async function findStaff(staffID: string | LocationQueryValue[]): Promise<staffType | undefined> {
+    const response = await axios.get<staffType>(
+      `https://crm.humaid.co/api/staff/${staffID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      }
+    );
+
+    return response.data;
   }
 
   return {
+    totalStaff,
     staff,
     displayedStaff,
     pageSize,
     currentPage,
     setCurrentPage,
     findStaff,
+    fetchStaff,
   };
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useCategoriesStore } from "@/stores/categories";
 import { useRoute, useRouter } from "vue-router";
 
@@ -14,6 +14,7 @@ const router = useRouter();
 const categoriesStore = useCategoriesStore();
 
 
+const loading = ref(false);
 categoriesStore.setCurrentPage(Number(route.query.page) || 1);
 
 watch(
@@ -41,12 +42,21 @@ const handleRowClick = (e: rowEvent) => {
     }
   });
 };
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await categoriesStore.fetchCategories();
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table :data="categoriesStore.displayedCategories" @row-click="handleRowClick" class="[&_tbody]:cursor-pointer">
-      <el-table-column fixed prop="id" label="Category ID" class="cursor-pointer"/>
+    <el-table v-loading="loading" :data="categoriesStore.displayedCategories" @row-click="handleRowClick" class="[&_tbody]:cursor-pointer">
+      <el-table-column fixed prop="id" label="Category ID" class="cursor-pointer" show-overflow-tooltip />
       <el-table-column prop="name" label="Name" />
       <el-table-column prop="status" label="Status" width="180">
         <template #default="scope">
@@ -62,7 +72,7 @@ const handleRowClick = (e: rowEvent) => {
     <el-pagination
       layout="prev, pager, next"
       class="mt-auto"
-      :total="categoriesStore.categories.length"
+      :total="categoriesStore.totalCategories"
       :page-size="categoriesStore.pageSize"
       v-model:current-page="categoriesStore.currentPage"
       @current-change="handlePageChange"

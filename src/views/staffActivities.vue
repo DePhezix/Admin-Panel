@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { useStaffActivityStore } from "@/stores/staffActivity";
 import { useStaffStore } from "@/stores/staff";
 import { useOrganizationsStore } from "@/stores/organizations";
+import { useActivitiesStore } from "@/stores/activities";
 import { useAuthStore } from "@/stores/auth";
 
 import StaffActivityActions from "@/components/staffActivity/staffActivityActions.vue";
@@ -16,15 +17,13 @@ const orgazinationsStore = useOrganizationsStore();
 const staffStore = useStaffStore();
 const staffActivityStore = useStaffActivityStore();
 const authStore = useAuthStore();
+const activitiesStore = useActivitiesStore();
 
 staffActivityStore.setCurrentPage(Number(route.query.page) || 1);
 
-const currentOrganization = route.params.organizationId
-  ? orgazinationsStore.findOrganization(route.params.organizationId)?.name
-  : undefined;
-const currentStaff = route.params.staffId
-  ? staffStore.findStaff(route.params.staffId)?.name
-  : undefined;
+const loading = ref(true)
+const currentOrganization = ref<string | undefined>(undefined);
+const currentStaff = ref<string | undefined>(undefined);
 
 watch(
   () => route.query.page,
@@ -32,6 +31,33 @@ watch(
     staffActivityStore.setCurrentPage(Number(newPage) || 1);
   }
 );
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await Promise.all([
+      staffActivityStore.fetchStaffActivity(
+        route.params.organizationId,
+        route.params.staffId
+      ),
+      route.params.organizationId
+        ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
+            currentOrganization.value = organization?.name;
+          })
+        : Promise.resolve(),
+      route.params.staffId
+        ? staffStore.findStaff(route.params.staffId).then((staff) => {
+            currentStaff.value = staff?.name;
+          })
+        : Promise.resolve(),
+      staffActivityStore.staffActivity.map((staffAct) => {
+        activitiesStore.findActivity(staffAct.activity_id)
+      })
+    ]);
+  } finally {
+    loading.value = false;
+  }
+})
 
 const handlePageChange = (page: number) => {
   router.push({
@@ -85,7 +111,7 @@ const handlePageChange = (page: number) => {
     <el-pagination
       layout="prev, pager, next"
       class="mt-auto"
-      :total="staffActivityStore.staffActivity.length"
+      :total="staffActivityStore.totalStaffActivity"
       :page-size="staffActivityStore.pageSize"
       v-model:current-page="staffActivityStore.currentPage"
       @current-change="handlePageChange"

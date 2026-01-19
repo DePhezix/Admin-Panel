@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useActivitiesStore } from "@/stores/activities";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useAuthStore } from "@/stores/auth";
@@ -10,13 +10,28 @@ const route = useRoute();
 const router = useRouter();
 const orgazinationsStore = useOrganizationsStore();
 const activitiesStore = useActivitiesStore();
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 
 activitiesStore.setCurrentPage(Number(route.query.page) || 1);
 
-const currentOrganization = route.params.organizationId
-  ? orgazinationsStore.findOrganization(route.params.organizationId)?.name
-  : undefined;
+const currentOrganization = ref<string | undefined>(undefined);
+const loading = ref(true);
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await Promise.all([
+      activitiesStore.fetchActivities(route.params.organizationId),
+      route.params.organizationId
+        ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
+            currentOrganization.value = organization?.name;
+          })
+        : Promise.resolve(),
+    ]);
+  } finally {
+    loading.value = false;
+  }
+});
 
 watch(
   () => route.query.page,
@@ -37,7 +52,7 @@ const handlePageChange = (page: number) => {
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table :data="activitiesStore.displayedActivities">
+    <el-table v-loading="loading" :data="activitiesStore.displayedActivities">
       <el-table-column label="Organization" show-overflow-tooltip>
         <template #default="scope">
           <el-text>
@@ -63,7 +78,7 @@ const handlePageChange = (page: number) => {
     <el-pagination
       layout="prev, pager, next"
       class="mt-auto"
-      :total="activitiesStore.activities.length"
+      :total="activitiesStore.totalActivities"
       :page-size="activitiesStore.pageSize"
       v-model:current-page="activitiesStore.currentPage"
       @current-change="handlePageChange"
