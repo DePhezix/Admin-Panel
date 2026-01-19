@@ -71,7 +71,7 @@ const handlePageChange = (page: number) => {
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table :data="staffActivityStore.displayedStaffActivity">
+    <el-table v-loading="loading" :data="staffActivityStore.displayedStaffActivity">
       <el-table-column label="Organization" show-overflow-tooltip>
         <template #default="scope">
           <el-text>
