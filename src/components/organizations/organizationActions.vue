@@ -19,8 +19,8 @@ interface formType {
 const route = useRoute();
 const categoriesStores = useCategoriesStore();
 
-const currentCategory = route.query.category
-  ? categoriesStores.findCategory(route.query.category)?.name
+const currentCategory = route.params.categoryId
+  ? categoriesStores.findCategory(route.params.categoryId)?.name
   : undefined;
 
 const editOpen = ref<boolean>(false);

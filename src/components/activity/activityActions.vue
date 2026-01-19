@@ -19,7 +19,7 @@ const route = useRoute()
 const organizationsStore = useOrganizationsStore();
 
 const editOpen = ref<boolean>(false);
-const orgName: string | undefined = route.query.organization ? organizationsStore.findOrganization(route.query.organization)?.name : undefined;
+const orgName: string | undefined = route.params.organizationId ? organizationsStore.findOrganization(route.params.organizationId)?.name : undefined;
 const form = reactive<formType>({
   name: props.name ?? "",
   orgName: orgName ?? "",

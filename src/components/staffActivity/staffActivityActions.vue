@@ -24,8 +24,8 @@ const staffStore = useStaffStore();
 const organizationStore = useOrganizationsStore();
 
 const editOpen = ref<boolean>(false);
-const workerName: string | undefined = route.query.staff ? staffStore.findStaff(route.query.staff)?.name : undefined;
-const orgName: string | undefined = route.query.organization ? organizationStore.findOrganization(route.query.organization)?.name : undefined;
+const workerName: string | undefined = route.params.staffId ? staffStore.findStaff(route.params.staffId)?.name : undefined;
+const orgName: string | undefined = route.params.organizationId ? organizationStore.findOrganization(route.params.organizationId)?.name : undefined;
 const activityName: string | undefined = "";
 
 const form = reactive<formType>({

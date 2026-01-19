@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import Cookies from "js-cookie";
+import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
 
 const routes = [
   {
@@ -31,8 +32,28 @@ const routes = [
       },
       {
         path: "categories",
-        name: "categories",
-        component: () => import("@/views/categories.vue"),
+        children: [
+          {
+            path: "",
+            name: "categories",
+            component: () => import("@/views/categories.vue"),
+          },
+          {
+            path: ":categoryId",
+            name: "organizations",
+            component: () => import("@/views/organizations.vue"),
+          },
+          {
+            path: ":categoryId/organizations/:organizationId",
+            name: "staff_and_activities",
+            component: () => import("@/views/staffAndActivities.vue"),
+          },
+          {
+            path: ":categoryId/organization/:organizationId/staff/:staffId",
+            name: "staff_activities",
+            component: () => import("@/views/staffActivities.vue")
+          },
+        ],
       },
       {
         path: "equipment",

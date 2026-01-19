@@ -1,43 +1,71 @@
 <script setup lang="ts">
-import CategoriesTable from "@/components/categories/categoriesTable.vue";
-import OrganizationsTable from "@/components/categories/organizationsTable.vue";
-import StaffTable from "@/components/categories/staffTable.vue";
-import ActivitiesTable from "@/components/categories/activitiesTable.vue";
-import StaffActivityTable from "@/components/categories/staffActivityTable.vue";
+import { watch } from "vue";
+import { useCategoriesStore } from "@/stores/categories";
 import { useRoute, useRouter } from "vue-router";
-import { ElTabPane } from "element-plus";
-import { ref } from "vue";
+
+interface rowEvent extends Event {
+  active: boolean;
+  id: string;
+  name: string;
+}
 
 const route = useRoute();
 const router = useRouter();
+const categoriesStore = useCategoriesStore();
 
-const activeName = ref<string>(route.query.tab || "staff");
-const handleClick = () => {
+
+categoriesStore.setCurrentPage(Number(route.query.page) || 1);
+
+watch(
+  () => route.query.page,
+  (newPage) => {
+    categoriesStore.setCurrentPage(Number(newPage) || 1);
+  }
+);
+
+const handlePageChange = (page: number) => {
   router.push({
     query: {
-      category: route.query.category,
-      organization: route.query.organization,
-      tab: activeName.value === "staff" ? "activity" : "staff",
+      ...route.query,
+      page: String(page),
     },
+  });
+};
+
+const handleRowClick = (e: rowEvent) => {
+  router.push({
+    name: 'organizations',
+    params: {
+      ...route.params,
+      categoryId: e.id,
+    }
   });
 };
 </script>
 
 <template>
-  <CategoriesTable v-if="!route.query.category" />
-  <organizations-table v-else-if="route.query.category && !route.query.organization" />
-  <staff-activity-table v-else-if="route.query.staff" />
-  <el-tabs
-    v-model="activeName"
-    v-if="route.query.organization && !route.query.staff && !route.query.activity"
-    @tab-click="handleClick"
-    class="h-full"
-  >
-    <el-tab-pane label="Staff" name="staff" class="h-full">
-      <staff-table />
-    </el-tab-pane>
-    <el-tab-pane label="Activity" name="activity" class="h-full">
-      <ActivitiesTable />
-    </el-tab-pane>
-  </el-tabs>
+  <div class="w-full flex flex-col items-center min-h-full">
+    <el-table :data="categoriesStore.displayedCategories" @row-click="handleRowClick" class="[&_tbody]:cursor-pointer">
+      <el-table-column fixed prop="id" label="Category ID" class="cursor-pointer"/>
+      <el-table-column prop="name" label="Name" />
+      <el-table-column prop="status" label="Status" width="180">
+        <template #default="scope">
+          <el-tag :type="scope.row.active ? 'success' : 'danger'" disable-transitions>
+            <span class="flex items-center gap-[5px]">
+              <el-icon><CircleCheck v-if="scope.row.active" /><CircleClose v-else /></el-icon>
+              {{ scope.row.active ? "Active" : "Inactive" }}
+            </span>
+          </el-tag>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      layout="prev, pager, next"
+      class="mt-auto"
+      :total="categoriesStore.categories.length"
+      :page-size="categoriesStore.pageSize"
+      v-model:current-page="categoriesStore.currentPage"
+      @current-change="handlePageChange"
+    />
+  </div>
 </template>

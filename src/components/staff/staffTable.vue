@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { watch } from "vue";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useCategoriesStore } from "@/stores/categories";
+import { useStaffStore } from "@/stores/staff";
 import { useAuthStore } from "@/stores/auth";
+import { useOrganizationsStore } from "@/stores/organizations";
 import { useRoute, useRouter } from "vue-router";
-import OrganizationActions from "../organizations/organizationActions.vue";
+import StaffActions from "../staff/staffActions.vue";
 
 interface rowEvent extends Event {
   active: boolean;
@@ -15,19 +15,19 @@ interface rowEvent extends Event {
 const route = useRoute();
 const router = useRouter();
 const orgazinationsStore = useOrganizationsStore();
-const categoriesStore = useCategoriesStore();
-const authStore = useAuthStore()
+const staffStore = useStaffStore();
+const authStore = useAuthStore();
 
-orgazinationsStore.setCurrentPage(Number(route.query.page) || 1);
+staffStore.setCurrentPage(Number(route.query.page) || 1);
 
-const currentCategory = route.query.category
-  ? categoriesStore.findCategory(route.query.category)?.name
+const currentOrganization = route.params.organizationId
+  ? orgazinationsStore.findOrganization(route.params.organizationId)?.name
   : undefined;
 
 watch(
   () => route.query.page,
   (newPage) => {
-    orgazinationsStore.setCurrentPage(Number(newPage) || 1);
+    staffStore.setCurrentPage(Number(newPage) || 1);
   }
 );
 
@@ -42,9 +42,10 @@ const handlePageChange = (page: number) => {
 
 const handleRowClick = (e: rowEvent) => {
   router.push({
-    query: {
-      category: route.query.category,
-      organization: e.id,
+    name: "staff_activities",
+    params: {
+      ...route.params,
+      staffId: e.id,
     },
   });
 };
@@ -53,43 +54,43 @@ const handleRowClick = (e: rowEvent) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table
-      :data="orgazinationsStore.displayedOrganizations"
+      :data="staffStore.displayedStaff"
       @row-click="handleRowClick"
       class="[&_tbody]:cursor-pointer"
     >
-      <el-table-column label="Category">
+      <el-table-column label="Organization" show-overflow-tooltip>
         <template #default="scope">
           <el-text>
-            {{ currentCategory }}
+            {{ currentOrganization }}
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="Name" />
-      <el-table-column
-        prop="id"
-        label="Organization ID"
-        class="cursor-pointer"
-        show-overflow-tooltip
-      />
+      <el-table-column prop="name" label="Name" show-overflow-tooltip />
+      <el-table-column prop="surname" label="Surname" show-overflow-tooltip />
+      <el-table-column prop="id" label="Staff ID" show-overflow-tooltip />
       <el-table-column
         fixed="right"
         header-align="right"
         align="right"
         min-width="120"
         label="Actions"
-        v-if="authStore.userRole === 'admin'"
+        v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
       >
         <template #default="scope">
-          <OrganizationActions :name="scope.row.name" :org_id="scope.row.id" />
+          <StaffActions
+            :name="scope.row.name"
+            :surname="scope.row.surname"
+            :worker_id="scope.row.id"
+          />
         </template>
       </el-table-column>
     </el-table>
     <el-pagination
       layout="prev, pager, next"
       class="mt-auto"
-      :total="orgazinationsStore.organizations.length"
-      :page-size="orgazinationsStore.pageSize"
-      v-model:current-page="orgazinationsStore.currentPage"
+      :total="staffStore.staff.length"
+      :page-size="staffStore.pageSize"
+      v-model:current-page="staffStore.currentPage"
       @current-change="handlePageChange"
     />
   </div>

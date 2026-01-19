@@ -15,6 +15,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const formRef = ref<FormInstance>();
+const loading = ref(false);
 
 const form = reactive<LoginForm>({
   email: "",
@@ -47,10 +48,12 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid) => {
     if (valid) {
-      const response =  await authStore.loginUser(form.email, form.password);
+      loading.value = true;
+      const response = await authStore.loginUser(form.email, form.password);
       if (response.access_token) {
         router.replace({ name: "dashboard" });
       }
+      loading.value = false;
     }
   });
 };
@@ -93,7 +96,9 @@ const submitForm = async (formEl: FormInstance | undefined) => {
             :prefix-icon="Lock"
           />
         </el-form-item>
-        <el-button type="primary" class="!h-[40px]" @click="submitForm(formRef)">Login</el-button>
+        <el-button type="primary" class="!h-[40px]" @click="submitForm(formRef)" :loading="loading"
+          >Login</el-button
+        >
       </el-form>
     </el-card>
   </el-main>

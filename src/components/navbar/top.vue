@@ -78,49 +78,48 @@ const authorized = computed<boolean>(() => {
 
 <template>
   <el-header class="w-full justify-self-end flex justify-between items-center gap-[20px]">
-    <el-breadcrumb :separator-icon="ArrowRight" v-if="route.path === '/categories'">
+    <el-breadcrumb :separator-icon="ArrowRight" v-if="route.path.includes('categories')">
       <el-breadcrumb-item :to="{ path: '/categories' }">Categories</el-breadcrumb-item>
       <el-breadcrumb-item
-        v-if="route.query.category"
+        v-if="route.params.categoryId"
         :to="{
-          path: '/categories',
-          query: {
-            category: route.query.category,
+          name: 'organizations',
+          params: {
+            categoryId: route.params.categoryId,
           },
         }"
         >Organizations</el-breadcrumb-item
       >
       <el-breadcrumb-item
-        v-if="route.query.organization && (!route.query.tab || route.query.tab === 'staff')"
+        v-if="route.params.organizationId && (!route.query.tab || route.query.tab === 'staff')"
         :to="{
-          path: '/categories',
-          query: {
-            category: route.query.category,
-            organization: route.query.organization,
+          name: 'staff_and_activities',
+          params: {
+            categoryId: route.params.categoryId,
+            organizationId: route.params.organizationId,
           },
         }"
         >Staff</el-breadcrumb-item
       >
       <el-breadcrumb-item
-        v-if="route.query.organization &&route.query.tab === 'activity'"
+        v-if="route.params.organizationId && route.query.tab === 'activity'"
         :to="{
-          path: '/categories',
-          query: {
-            category: route.query.category,
-            organization: route.query.organization,
+          name: 'staff_and_activities',
+          params: {
+            categoryId: route.params.categoryId,
+            organizationId: route.params.organizationId,
           },
         }"
         >Activity</el-breadcrumb-item
       >
       <el-breadcrumb-item
-        v-if="route.query.staff"
+        v-if="route.params.staffId"
         :to="{
-          path: '/categories',
-          query: {
-            category: route.query.category,
-            organization: route.query.organization,
-            staff: route.query.staff,
-            activity: route.query.activity,
+          name: 'staff_activities',
+          params: {
+            categoryId: route.params.categoryId,
+            organizationId: route.params.organizationId,
+            staffId: route.params.staffId,
           },
         }"
         >Staff Activity</el-breadcrumb-item

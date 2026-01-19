@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { sha256 } from "js-sha256";
 import Cookies from "js-cookie";
 import axios from "axios";
 
@@ -22,6 +23,8 @@ interface userData {
 }
 
 export const useAuthStore = defineStore("auth", () => {
+  const hash = sha256.create();
+
   const userRole = ref<userTypes>(null);
   const token = ref<string | null>(null);
 
@@ -52,9 +55,11 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function loginUser(email: string, password: string) {
     try {
+      hash.update(password);
+      
       const response = await axios.post<loginResponse>("https://crm.humaid.co/api/auth/login", {
         email,
-        password,
+        password: hash.hex(),
       });
 
       token.value = response.data.access_token;

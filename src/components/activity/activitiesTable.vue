@@ -14,8 +14,8 @@ const authStore = useAuthStore()
 
 activitiesStore.setCurrentPage(Number(route.query.page) || 1);
 
-const currentOrganization = route.query.organization
-  ? orgazinationsStore.findOrganization(route.query.organization)?.name
+const currentOrganization = route.params.organizationId
+  ? orgazinationsStore.findOrganization(route.params.organizationId)?.name
   : undefined;
 
 watch(
@@ -38,14 +38,14 @@ const handlePageChange = (page: number) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table :data="activitiesStore.displayedActivities">
-      <el-table-column label="Organization">
+      <el-table-column label="Organization" show-overflow-tooltip>
         <template #default="scope">
           <el-text>
             {{ currentOrganization }}
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="Activity" />
+      <el-table-column prop="name" label="Activity" show-overflow-tooltip />
       <el-table-column prop="id" label="Activity ID" show-overflow-tooltip />
       <el-table-column
         fixed="right"

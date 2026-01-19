@@ -28,7 +28,7 @@ const handleChange = (newNavIdx: string) => {
   const idx = Number(newNavIdx);
   const newNav = sideNavigationArr[idx]?.split(" ").join("_");
   if (newNav) {
-    router.push(newNav);
+    router.push({ name: newNav });
   }
 };
 </script>

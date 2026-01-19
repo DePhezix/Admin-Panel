@@ -7,7 +7,7 @@ import { useStaffStore } from "@/stores/staff";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useAuthStore } from "@/stores/auth";
 
-import StaffActivityActions from "../staffActivity/staffActivityActions.vue";
+import StaffActivityActions from "@/components/staffActivity/staffActivityActions.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -19,10 +19,12 @@ const authStore = useAuthStore();
 
 staffActivityStore.setCurrentPage(Number(route.query.page) || 1);
 
-const currentOrganization = route.query.organization
-  ? orgazinationsStore.findOrganization(route.query.organization)?.name
+const currentOrganization = route.params.organizationId
+  ? orgazinationsStore.findOrganization(route.params.organizationId)?.name
   : undefined;
-const currentStaff = route.query.staff ? staffStore.findStaff(route.query.staff)?.name : undefined;
+const currentStaff = route.params.staffId
+  ? staffStore.findStaff(route.params.staffId)?.name
+  : undefined;
 
 watch(
   () => route.query.page,
@@ -44,7 +46,7 @@ const handlePageChange = (page: number) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table :data="staffActivityStore.displayedStaffActivity">
-      <el-table-column label="Organization">
+      <el-table-column label="Organization" show-overflow-tooltip>
         <template #default="scope">
           <el-text>
             {{ currentOrganization }}
@@ -52,7 +54,7 @@ const handlePageChange = (page: number) => {
         </template>
       </el-table-column>
 
-      <el-table-column label="Worker">
+      <el-table-column label="Worker" show-overflow-tooltip>
         <template #default="scope">
           <el-text>
             {{ currentStaff }}
@@ -62,7 +64,7 @@ const handlePageChange = (page: number) => {
 
       <el-table-column label="Activity" class="cursor-pointer" show-overflow-tooltip />
 
-      <el-table-column prop="id" label="Staff Activity ID" />
+      <el-table-column prop="id" label="Staff Activity ID" show-overflow-tooltip />
 
       <el-table-column
         fixed="right"
@@ -83,9 +85,9 @@ const handlePageChange = (page: number) => {
     <el-pagination
       layout="prev, pager, next"
       class="mt-auto"
-      :total="staffStore.staff.length"
-      :page-size="staffStore.pageSize"
-      v-model:current-page="staffStore.currentPage"
+      :total="staffActivityStore.staffActivity.length"
+      :page-size="staffActivityStore.pageSize"
+      v-model:current-page="staffActivityStore.currentPage"
       @current-change="handlePageChange"
     />
   </div>

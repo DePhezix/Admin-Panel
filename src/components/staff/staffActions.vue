@@ -20,7 +20,7 @@ interface formType {
 
 const route = useRoute()
 const organizationStore = useOrganizationsStore()
-const orgName = route.query.organization ? organizationStore.findOrganization(route.query.organization)?.name : ""
+const orgName = route.params.organizationId ? organizationStore.findOrganization(route.params.organizationId)?.name : ""
 
 const editOpen = ref<boolean>(false);
 const form = reactive<formType>({
