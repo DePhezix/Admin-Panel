@@ -2,6 +2,7 @@
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { ElMessage } from "element-plus";
 
 import type { FormInstance, FormRules } from "element-plus";
 import { Lock, Message } from "@element-plus/icons-vue";
@@ -49,11 +50,20 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid) => {
     if (valid) {
       loading.value = true;
-      const response = await authStore.loginUser(form.email, form.password);
-      if (response.access_token) {
-        router.replace({ name: "dashboard" });
+      try {
+        const response = await authStore.loginUser(form.email, form.password);
+        if (response.access_token) {
+          router.replace({ name: "dashboard" });
+          ElMessage({
+            message: "Successfully logged in",
+            type: "success",
+          });
+        }
+      } catch (err) {
+        ElMessage.error("Login failed. Please check your credentials.");
+      } finally {
+        loading.value = false;
       }
-      loading.value = false;
     }
   });
 };
