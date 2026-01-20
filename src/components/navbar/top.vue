@@ -4,7 +4,8 @@ import { useSessionsStore } from "@/stores/sessions";
 import { useRoute } from "vue-router";
 import { ref, computed, defineAsyncComponent } from "vue";
 import { ArrowRight } from "@element-plus/icons-vue";
-import type { CheckboxValueType } from "element-plus";
+import { useDebounceFn } from "@vueuse/core";
+import { type CheckboxValueType } from "element-plus";
 
 type sideNavigationType = "dashboard" | "categories" | "equipment" | "sessions" | "settings";
 
@@ -29,7 +30,7 @@ const dialogComponents: Partial<
 };
 
 const authStore = useAuthStore();
-const filtersStore = useSessionsStore();
+const sessionsStore = useSessionsStore();
 const route = useRoute();
 
 const search = ref<string>("");
@@ -39,14 +40,14 @@ const isIndeterminate = ref<boolean>(true);
 const checkAll = ref(false);
 
 const handleCheckAllChange = (val: CheckboxValueType) => {
-  filtersStore.setCheckedFilters(val ? filtersStore.filters : []);
+  sessionsStore.setCheckedFilters(val ? sessionsStore.filters : []);
   isIndeterminate.value = false;
 };
 
 const handleCheckedFiltersChange = (value: CheckboxValueType[]) => {
   const checkedCount = value.length;
-  checkAll.value = checkedCount === filtersStore.filters.length;
-  isIndeterminate.value = checkedCount > 0 && checkedCount < filtersStore.filters.length;
+  checkAll.value = checkedCount === sessionsStore.filters.length;
+  isIndeterminate.value = checkedCount > 0 && checkedCount < sessionsStore.filters.length;
 };
 
 const currentNavIdx = computed<number>(() => {
@@ -74,6 +75,19 @@ const authorized = computed<boolean>(() => {
   /*   }
    */
 });
+
+const debouncedSearch = useDebounceFn((value: string) => {
+  sessionsStore.searchSession(value);
+}, 500);
+
+const handleSearchChange = (value: string) => {
+  search.value = value;
+  if (value.length > 0) {
+    debouncedSearch(value);
+  } else {
+    sessionsStore.fetchSessions()
+  }
+};
 </script>
 
 <template>
@@ -127,7 +141,8 @@ const authorized = computed<boolean>(() => {
     </el-breadcrumb>
     <div class="ml-auto flex justify-end items-center gap-[20px]">
       <el-input
-        v-model="search"
+        :model-value="search"
+        @input="handleSearchChange"
         :placeholder="`Search ${currentNav}`"
         clearable
         class="w-[250px]"
@@ -155,11 +170,11 @@ const authorized = computed<boolean>(() => {
             Filter All
           </el-checkbox>
           <el-checkbox-group
-            v-model="filtersStore.checkedFilters"
+            v-model="sessionsStore.checkedFilters"
             @change="handleCheckedFiltersChange"
           >
             <el-checkbox
-              v-for="filter in filtersStore.filters"
+              v-for="filter in sessionsStore.filters"
               :key="filter"
               :label="filter"
               :value="filter"

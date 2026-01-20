@@ -36,7 +36,7 @@ export const useSessionsStore = defineStore("sessions", () => {
 
   const sessions = ref<workerSessionType[]>([]);
 
-  const loading = ref<boolean>(true)
+  const loading = ref<boolean>(true);
 
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 42.2) - 6);
@@ -56,12 +56,16 @@ export const useSessionsStore = defineStore("sessions", () => {
   }
 
   const fetchSessions = async () => {
-    loading.value = true
+    loading.value = true;
     try {
       const response = await axios.get<responseType>(
         `https://crm.humaid.co/api/worker-session?page=${
           currentPage.value > 1 ? currentPage.value / pageSizeMultiple.value : 1
-        }&limit=${pageSize.value * pageSizeMultiple.value}${checkedFilters.value.length === 1 ? `&active=${checkedFilters.value.includes("Active")}` : ""}`,
+        }&limit=${pageSize.value * pageSizeMultiple.value}${
+          checkedFilters.value.length === 1
+            ? `&active=${checkedFilters.value.includes("Active")}`
+            : ""
+        }`,
         {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
@@ -74,7 +78,29 @@ export const useSessionsStore = defineStore("sessions", () => {
     } catch (error) {
       console.error("Error fetching sessions:", error);
     } finally {
-      loading.value = false
+      loading.value = false;
+    }
+  };
+
+  const searchSession = async (searchID: string) => {
+    loading.value = true;
+    try {
+      const response = await axios.get<workerSessionType>(
+        `https://crm.humaid.co/api/worker-session/${searchID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+
+      sessions.value = []
+      sessions.value[0] = response.data;
+    } catch (error) {
+      console.error("Error fetching session", error);
+      sessions.value = []
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -89,9 +115,9 @@ export const useSessionsStore = defineStore("sessions", () => {
 
   watch(currentPage, () => {
     if (currentPage.value * pageSize.value == currentPage.value * pageSizeMultiple.value) {
-      fetchSessions()
+      fetchSessions();
     }
-  })
+  });
 
   const displayedSessions = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
@@ -120,5 +146,6 @@ export const useSessionsStore = defineStore("sessions", () => {
     setPageSize,
     setCheckedFilters,
     fetchSessions,
+    searchSession
   };
 });
