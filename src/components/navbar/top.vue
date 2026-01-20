@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TopSessions from "./topSessions.vue";
-import TopCategoires from "./topCategoires.vue";
+import TopCategoires from "./topCategories.vue";
 
 import { useRoute } from "vue-router";
 

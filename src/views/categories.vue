@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { watch, onMounted } from "vue";
 import { useCategoriesStore } from "@/stores/categories";
 import { useRoute, useRouter } from "vue-router";
 
@@ -13,8 +13,6 @@ const route = useRoute();
 const router = useRouter();
 const categoriesStore = useCategoriesStore();
 
-
-const loading = ref(false);
 categoriesStore.setCurrentPage(Number(route.query.page) || 1);
 
 watch(
@@ -35,28 +33,34 @@ const handlePageChange = (page: number) => {
 
 const handleRowClick = (e: rowEvent) => {
   router.push({
-    name: 'organizations',
+    name: "organizations",
     params: {
       ...route.params,
       categoryId: e.id,
-    }
+    },
   });
 };
 
 onMounted(async () => {
-  loading.value = true;
-  try {
-    await categoriesStore.fetchCategories();
-  } finally {
-    loading.value = false;
-  }
+  await categoriesStore.fetchCategories();
 });
 </script>
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table v-loading="loading" :data="categoriesStore.displayedCategories" @row-click="handleRowClick" class="[&_tbody]:cursor-pointer">
-      <el-table-column fixed prop="id" label="Category ID" class="cursor-pointer" show-overflow-tooltip />
+    <el-table
+      v-loading="categoriesStore.loading"
+      :data="categoriesStore.displayedCategories"
+      @row-click="handleRowClick"
+      class="[&_tbody]:cursor-pointer"
+    >
+      <el-table-column
+        fixed
+        prop="id"
+        label="Category ID"
+        class="cursor-pointer"
+        show-overflow-tooltip
+      />
       <el-table-column prop="name" label="Name" />
       <el-table-column prop="status" label="Status" width="180">
         <template #default="scope">

@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/stores/auth";
 import { useRoute } from "vue-router";
-import { ref, computed, defineAsyncComponent } from "vue";
+import { watch, ref, computed, defineAsyncComponent } from "vue";
 import { ArrowRight } from "@element-plus/icons-vue";
 import { useDebounceFn } from "@vueuse/core";
 import { type CheckboxValueType } from "element-plus";
+import { useCategoriesStore } from "@/stores/categories";
+import { useOrganizationsStore } from "@/stores/organizations";
+import { useStaffStore } from "@/stores/staff";
+import { useActivitiesStore } from "@/stores/activities";
+import { useStaffActivityStore } from "@/stores/staffActivity";
 
 type navigationType = "Categories" | "Organization" | "Staff" | "Activity" | "Staff Activity";
 
@@ -12,6 +17,12 @@ const dialogComponents: Partial<Record<navigationType, ReturnType<typeof defineA
   {};
 
 const authStore = useAuthStore();
+const categoriesStore = useCategoriesStore();
+const organizationStore = useOrganizationsStore();
+const staffStore = useStaffStore();
+const activityStore = useActivitiesStore();
+const staffActivityStore = useStaffActivityStore();
+
 const route = useRoute();
 
 const search = ref<string>("");
@@ -55,8 +66,19 @@ const authorized = computed<boolean>(() => {
 });
 
 const debouncedSearch = useDebounceFn((value: string) => {
-  /*   sessionsStore.searchSession(value);
-   */
+  if (search.value.length > 0) {
+    if (currentNav.value == "Categories") {
+      categoriesStore.searchCategory(value);
+    } else if (currentNav.value == "Organization") {
+      organizationStore.searchOrganization(value);
+    } else if (currentNav.value == "Staff") {
+      staffStore.searchStaff(value);
+    } else if (currentNav.value == "Activity") {
+      activityStore.searchActivity(value);
+    } else {
+      staffActivityStore.searchStaffActivity(value);
+    }
+  }
 }, 500);
 
 const handleSearchChange = (value: string) => {
@@ -64,10 +86,23 @@ const handleSearchChange = (value: string) => {
   if (value.length > 0) {
     debouncedSearch(value);
   } else {
-    /*     sessionsStore.fetchSessions();
-     */
+    if (currentNav.value == "Categories") {
+      categoriesStore.fetchCategories();
+    } else if (currentNav.value == "Organization") {
+      organizationStore.fetchOrganizations(route.params.categoryId);
+    } else if (currentNav.value == "Staff") {
+      staffStore.fetchStaff(route.params.organizationId);
+    } else if (currentNav.value == "Activity") {
+      activityStore.fetchActivities(route.params.organizationId);
+    } else {
+      staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId);
+    }
   }
 };
+
+watch(currentNav, () => {
+  search.value = "";
+});
 </script>
 
 <template>
@@ -148,7 +183,7 @@ const handleSearchChange = (value: string) => {
       class="flex gap-[5px] items-center !m-[0]"
     >
       <el-icon><Plus /></el-icon>
-      <span> Add {{ currentNav }} </span>
+      <span> Add {{ currentNav && currentNav }} </span>
     </el-button>
   </div>
   <component

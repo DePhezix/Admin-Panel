@@ -21,6 +21,8 @@ export const useOrganizationsStore = defineStore("organizations", () => {
 
   const organizations = ref<organizationType[]>([]);
 
+  const loading = ref<boolean>(true);
+
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 3);
   const pageSizeMultiple = ref<number>(1);
@@ -33,10 +35,12 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   }
 
   const fetchOrganizations = async (categoryId: string | string[] | undefined) => {
+    loading.value = true;
+
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/organization?page=${
         currentPage.value > 1 ? currentPage.value : 1
-    }&limit=${pageSize.value * pageSizeMultiple.value}&category_id=${categoryId}`,
+      }&limit=${pageSize.value * pageSizeMultiple.value}&category_id=${categoryId}`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
@@ -44,9 +48,11 @@ export const useOrganizationsStore = defineStore("organizations", () => {
       }
     );
 
+    loading.value = false;
+
     organizations.value = response.data.data;
     totalOrganizations.value = response.data.total;
-  }
+  };
 
   const displayedOrganizations = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
@@ -61,18 +67,35 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   async function findOrganization(
     organizationID: string | LocationQueryValue[]
   ): Promise<organizationType | undefined> {
-    const response = await axios.get<organizationType>(
-      `https://crm.humaid.co/api/organization/${organizationID}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-        },
-      })
+    loading.value = true;
 
-    return response.data
+    try {
+      const response = await axios.get<organizationType>(
+        `https://crm.humaid.co/api/organization/${organizationID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+
+      return response.data;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function searchOrganization(organizationID: string | LocationQueryValue[]) {
+    organizations.value = [];
+    const response = await findOrganization(organizationID);
+
+    if (response) {
+      organizations.value[0] = response;
+    }
   }
 
   return {
+    loading,
     totalOrganizations,
     organizations,
     displayedOrganizations,
@@ -80,6 +103,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     currentPage,
     setCurrentPage,
     findOrganization,
-    fetchOrganizations
+    fetchOrganizations,
+    searchOrganization,
   };
 });

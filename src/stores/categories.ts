@@ -22,6 +22,8 @@ export const useCategoriesStore = defineStore("categories", () => {
 
   const authStore = useAuthStore();
 
+  const loading = ref<boolean>(true);
+
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 3);
   const pageSizeMultiple = ref<number>(1);
@@ -34,19 +36,26 @@ export const useCategoriesStore = defineStore("categories", () => {
   }
 
   const fetchCategories = async () => {
-    const response = await axios.get<responseType>(
-      `https://crm.humaid.co/api/category?page=${
-        currentPage.value > 1 ? currentPage.value / pageSizeMultiple.value : 1
-      }&limit=${pageSize.value * pageSizeMultiple.value}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-        },
-      }
-    );
+    loading.value = true;
+    try {
+      const response = await axios.get<responseType>(
+        `https://crm.humaid.co/api/category?page=${
+          currentPage.value > 1 ? currentPage.value / pageSizeMultiple.value : 1
+        }&limit=${pageSize.value * pageSizeMultiple.value}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
 
-    categories.value = response.data.data;
-    totalCategories.value = response.data.total;
+      categories.value = response.data.data;
+      totalCategories.value = response.data.total;
+    } catch (err) {
+      console.error(err);
+    } finally {
+      loading.value = false;
+    }
   };
 
   const displayedCategories = computed(() => {
@@ -59,17 +68,43 @@ export const useCategoriesStore = defineStore("categories", () => {
     currentPage.value = page;
   };
 
-  async function findCategory(categoryID: string | LocationQueryValue[]): Promise<categoryType | undefined> {
-    const response = await axios.get<categoryType>(
-      `https://crm.humaid.co/api/category/${categoryID}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-        },
-      })
-
-    return response.data
+  async function findCategory(
+    categoryID: string | LocationQueryValue[]
+  ): Promise<categoryType | undefined> {
+    loading.value = true;
+    try {
+      const response = await axios.get<categoryType>(
+        `https://crm.humaid.co/api/category/${categoryID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+      return response.data;
+    } finally {
+      loading.value = false;
+    }
   }
 
-  return { totalCategories, categories, displayedCategories, pageSize, currentPage, setCurrentPage, findCategory, fetchCategories };
+  async function searchCategory(categoryID: string | LocationQueryValue[]) {
+    categories.value = [];
+    const result = await findCategory(categoryID);
+    if (result) {
+      categories.value[0] = result;
+    }
+  }
+
+  return {
+    loading,
+    totalCategories,
+    categories,
+    displayedCategories,
+    pageSize,
+    currentPage,
+    setCurrentPage,
+    findCategory,
+    fetchCategories,
+    searchCategory,
+  };
 });

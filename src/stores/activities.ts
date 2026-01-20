@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { watch, ref, computed } from "vue";
+import { ref, computed } from "vue";
 import { useAuthStore } from "./auth";
 import axios from "axios";
 
@@ -21,6 +21,8 @@ export const useActivitiesStore = defineStore("activities", () => {
 
   const activities = ref<activityType[]>([]);
 
+  const loading = ref<boolean>(true);
+
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 6);
   const pageSizeMultiple = ref<number>(1);
@@ -33,6 +35,8 @@ export const useActivitiesStore = defineStore("activities", () => {
   }
 
   const fetchActivities = async (organizationId: string | string[] | undefined) => {
+    loading.value = true;
+
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/activity?page=${
         currentPage.value > 1 ? currentPage.value : 1
@@ -43,6 +47,8 @@ export const useActivitiesStore = defineStore("activities", () => {
         },
       }
     );
+
+    loading.value = false;
 
     totalActivities.value = response.data.total;
     activities.value = response.data.data;
@@ -59,19 +65,35 @@ export const useActivitiesStore = defineStore("activities", () => {
   };
 
   async function findActivity(activityID: string | null): Promise<activityType | undefined> {
-    const response = await axios.get<activityType>(
-      `https://crm.humaid.co/api/activity/${activityID}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-        },
-      }
-    );
+    loading.value = true;
 
-    return response.data;
+    try {
+      const response = await axios.get<activityType>(
+        `https://crm.humaid.co/api/activity/${activityID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+
+      return response.data;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function searchActivity(activityID: string | null) {
+    activities.value = [];
+    const response = await findActivity(activityID);
+
+    if (response) {
+      activities.value[0] = response;
+    }
   }
 
   return {
+    loading,
     totalActivities,
     activities,
     displayedActivities,
@@ -80,5 +102,6 @@ export const useActivitiesStore = defineStore("activities", () => {
     setCurrentPage,
     findActivity,
     fetchActivities,
+    searchActivity,
   };
 });

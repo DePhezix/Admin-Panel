@@ -21,7 +21,6 @@ const activitiesStore = useActivitiesStore();
 
 staffActivityStore.setCurrentPage(Number(route.query.page) || 1);
 
-const loading = ref(true)
 const currentOrganization = ref<string | undefined>(undefined);
 const currentStaff = ref<string | undefined>(undefined);
 
@@ -33,31 +32,23 @@ watch(
 );
 
 onMounted(async () => {
-  loading.value = true;
-  try {
-    await Promise.all([
-      staffActivityStore.fetchStaffActivity(
-        route.params.organizationId,
-        route.params.staffId
-      ),
-      route.params.organizationId
-        ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
-            currentOrganization.value = organization?.name;
-          })
-        : Promise.resolve(),
-      route.params.staffId
-        ? staffStore.findStaff(route.params.staffId).then((staff) => {
-            currentStaff.value = staff?.name;
-          })
-        : Promise.resolve(),
-      staffActivityStore.staffActivity.map((staffAct) => {
-        activitiesStore.findActivity(staffAct.activity_id)
-      })
-    ]);
-  } finally {
-    loading.value = false;
-  }
-})
+  await Promise.all([
+    route.params.organizationId
+      ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
+          currentOrganization.value = organization?.name;
+        })
+      : Promise.resolve(),
+    route.params.staffId
+      ? staffStore.findStaff(route.params.staffId).then((staff) => {
+          currentStaff.value = staff?.name;
+        })
+      : Promise.resolve(),
+    staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId),
+    staffActivityStore.staffActivity.map((staffAct) => {
+      activitiesStore.findActivity(staffAct.activity_id);
+    }),
+  ]);
+});
 
 const handlePageChange = (page: number) => {
   router.push({
@@ -71,7 +62,10 @@ const handlePageChange = (page: number) => {
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table v-loading="loading" :data="staffActivityStore.displayedStaffActivity">
+    <el-table
+      v-loading="staffActivityStore.loading && activitiesStore.loading"
+      :data="staffActivityStore.displayedStaffActivity"
+    >
       <el-table-column label="Organization" show-overflow-tooltip>
         <template #default="scope">
           <el-text>

@@ -20,7 +20,6 @@ const authStore = useAuthStore();
 
 staffStore.setCurrentPage(Number(route.query.page) || 1);
 
-const loading = ref<boolean>(true);
 const currentOrganization = ref<string | undefined>(undefined);
 
 watch(
@@ -31,19 +30,14 @@ watch(
 );
 
 onMounted(async () => {
-  loading.value = true;
-  try {
-    await Promise.all([
-      staffStore.fetchStaff(route.params.organizationId),
-      route.params.organizationId
-        ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
-            currentOrganization.value = organization?.name;
-          })
-        : Promise.resolve(),
-    ]);
-  } finally {
-    loading.value = false;
-  }
+  await Promise.all([
+    route.params.organizationId
+      ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
+          currentOrganization.value = organization?.name;
+        })
+      : Promise.resolve(),
+    staffStore.fetchStaff(route.params.organizationId),
+  ]);
 });
 
 const handlePageChange = (page: number) => {
@@ -69,7 +63,7 @@ const handleRowClick = (e: rowEvent) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table
-      v-loading="loading"
+      v-loading="staffStore.loading"
       :data="staffStore.displayedStaff"
       @row-click="handleRowClick"
       class="[&_tbody]:cursor-pointer"

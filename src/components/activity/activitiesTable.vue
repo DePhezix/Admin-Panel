@@ -15,22 +15,16 @@ const authStore = useAuthStore();
 activitiesStore.setCurrentPage(Number(route.query.page) || 1);
 
 const currentOrganization = ref<string | undefined>(undefined);
-const loading = ref(true);
 
 onMounted(async () => {
-  loading.value = true;
-  try {
-    await Promise.all([
-      activitiesStore.fetchActivities(route.params.organizationId),
-      route.params.organizationId
-        ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
-            currentOrganization.value = organization?.name;
-          })
-        : Promise.resolve(),
-    ]);
-  } finally {
-    loading.value = false;
-  }
+  await Promise.all([
+    route.params.organizationId
+      ? orgazinationsStore.findOrganization(route.params.organizationId).then((organization) => {
+          currentOrganization.value = organization?.name;
+        })
+      : Promise.resolve(),
+    activitiesStore.fetchActivities(route.params.organizationId),
+  ]);
 });
 
 watch(
@@ -52,7 +46,7 @@ const handlePageChange = (page: number) => {
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table v-loading="loading" :data="activitiesStore.displayedActivities">
+    <el-table v-loading="activitiesStore.loading" :data="activitiesStore.displayedActivities">
       <el-table-column label="Organization" show-overflow-tooltip>
         <template #default="scope">
           <el-text>

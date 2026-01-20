@@ -19,7 +19,11 @@ interface responseType {
 }
 
 export const useStaffActivityStore = defineStore("staffActivity", () => {
+  const authStore = useAuthStore();
+
   const staffActivity = ref<staffActivtyType[]>([]);
+
+  const loading = ref<boolean>(true);
 
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 3);
@@ -36,7 +40,8 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     organizationId: string | string[] | undefined,
     staffId: string | string[] | undefined
   ) => {
-    const authStore = useAuthStore();
+    loading.value = true;
+
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/staff-activity?page=${
         currentPage.value > 1 ? currentPage.value : 1
@@ -49,6 +54,8 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
         },
       }
     );
+
+    loading.value = false;
 
     totalStaffActivity.value = response.data.total;
     staffActivity.value = response.data.data;
@@ -64,13 +71,38 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     currentPage.value = page;
   };
 
-  function findStaffActivity(
+  async function findStaffActivity(
     staffActivityID: string | LocationQueryValue[]
-  ): staffActivtyType | undefined {
-    return staffActivity.value.find((staffActivity) => staffActivity.id === staffActivityID);
+  ): Promise<staffActivtyType | undefined> {
+    loading.value = true;
+
+    try {
+      const response = await axios.get<staffActivtyType>(
+        `https://crm.humaid.co/api/staff-activity/${staffActivityID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+
+      return response.data;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function searchStaffActivity(staffActivityID: string | LocationQueryValue[]) {
+    staffActivity.value = [];
+    const response = await findStaffActivity(staffActivityID);
+
+    if (response) {
+      staffActivity.value[0] = response;
+    }
   }
 
   return {
+    loading,
     totalStaffActivity,
     staffActivity,
     displayedStaffActivity,
@@ -79,5 +111,6 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     setCurrentPage,
     findStaffActivity,
     fetchStaffActivity,
+    searchStaffActivity,
   };
 });

@@ -20,7 +20,6 @@ const authStore = useAuthStore();
 
 orgazinationsStore.setCurrentPage(Number(route.query.page) || 1);
 
-const loading = ref(true);
 const currentCategory = ref<string | undefined>(undefined);
 
 watch(
@@ -31,19 +30,14 @@ watch(
 );
 
 onMounted(async () => {
-  loading.value = true;
-  try {
-    await Promise.all([
-      orgazinationsStore.fetchOrganizations(route.params.categoryId),
-      route.params.categoryId
-        ? categoriesStore.findCategory(route.params.categoryId).then((category) => {
-            currentCategory.value = category?.name;
-          })
-        : Promise.resolve(),
-    ]);
-  } finally {
-    loading.value = false;
-  }
+  await Promise.all([
+    route.params.categoryId
+      ? categoriesStore.findCategory(route.params.categoryId).then((category) => {
+          currentCategory.value = category?.name;
+        })
+      : Promise.resolve(),
+    orgazinationsStore.fetchOrganizations(route.params.categoryId),
+  ]);
 });
 
 const handlePageChange = (page: number) => {
@@ -69,7 +63,7 @@ const handleRowClick = (e: rowEvent) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table
-      v-loading="loading"
+      v-loading="orgazinationsStore.loading"
       :data="orgazinationsStore.displayedOrganizations"
       @row-click="handleRowClick"
       class="[&_tbody]:cursor-pointer"

@@ -24,6 +24,8 @@ export const useStaffStore = defineStore("staff", () => {
 
   const staff = ref<staffType[]>([]);
 
+  const loading = ref<boolean>(true);
+
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 6);
   const pageSizeMultiple = ref<number>(1);
@@ -36,6 +38,8 @@ export const useStaffStore = defineStore("staff", () => {
   }
 
   const fetchStaff = async (organizationId: string | string[] | undefined) => {
+    loading.value = true;
+
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/staff?page=${
         currentPage.value > 1 ? currentPage.value : 1
@@ -46,6 +50,8 @@ export const useStaffStore = defineStore("staff", () => {
         },
       }
     );
+
+    loading.value = false;
 
     totalStaff.value = response.data.total;
     staff.value = response.data.data;
@@ -61,21 +67,33 @@ export const useStaffStore = defineStore("staff", () => {
     currentPage.value = page;
   };
 
-
   async function findStaff(staffID: string | LocationQueryValue[]): Promise<staffType | undefined> {
-    const response = await axios.get<staffType>(
-      `https://crm.humaid.co/api/staff/${staffID}`,
-      {
+    loading.value = true;
+
+    try {
+      const response = await axios.get<staffType>(`https://crm.humaid.co/api/staff/${staffID}`, {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
         },
-      }
-    );
+      });
 
-    return response.data;
+      return response.data;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function searchStaff(staffID: string | LocationQueryValue[]) {
+    staff.value = [];
+    const response = await findStaff(staffID);
+
+    if (response) {
+      staff.value[0] = response;
+    }
   }
 
   return {
+    loading,
     totalStaff,
     staff,
     displayedStaff,
@@ -84,5 +102,6 @@ export const useStaffStore = defineStore("staff", () => {
     setCurrentPage,
     findStaff,
     fetchStaff,
+    searchStaff,
   };
 });
