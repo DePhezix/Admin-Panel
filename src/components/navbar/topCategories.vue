@@ -28,19 +28,22 @@ const route = useRoute();
 const search = ref<string>("");
 const showCreateDialog = ref<boolean>(false);
 
+const hasSearch: navigationType[] = ["Organization", "Staff", "Activity"];
+const hasFilter: navigationType[] = ["Categories"];
+
 const isIndeterminate = ref<boolean>(true);
 const checkAll = ref(false);
 
-/* const handleCheckAllChange = (val: CheckboxValueType) => {
-  sessionsStore.setCheckedFilters(val ? sessionsStore.filters : []);
+const handleCheckAllChange = (val: CheckboxValueType) => {
+  categoriesStore.setCheckedFilters(val ? categoriesStore.filters : []);
   isIndeterminate.value = false;
 };
 
 const handleCheckedFiltersChange = (value: CheckboxValueType[]) => {
   const checkedCount = value.length;
-  checkAll.value = checkedCount === sessionsStore.filters.length;
-  isIndeterminate.value = checkedCount > 0 && checkedCount < sessionsStore.filters.length;
-}; */
+  checkAll.value = checkedCount === categoriesStore.filters.length;
+  isIndeterminate.value = checkedCount > 0 && checkedCount < categoriesStore.filters.length;
+};
 
 const currentNav = computed<navigationType | undefined>(() => {
   if (!route.params.categoryId) return "Categories";
@@ -57,47 +60,26 @@ const CurrentDialogComponent = computed(() => {
 });
 
 const authorized = computed<boolean>(() => {
-  /*   if (currentNav.value === "organizations") {
+  if (currentNav.value === "Organization") {
     return authStore.userData.role === "admin";
-  } else { */
-  return authStore.userData.role === "admin" || authStore.userData.role === "agent";
-  /*   }
-   */
+  } else {
+    return authStore.userData.role === "admin" || authStore.userData.role === "agent";
+  }
 });
 
 const debouncedSearch = useDebounceFn((value: string) => {
-  if (search.value.length > 0) {
-    if (currentNav.value == "Categories") {
-      categoriesStore.searchCategory(value);
-    } else if (currentNav.value == "Organization") {
-      organizationStore.searchOrganization(value);
-    } else if (currentNav.value == "Staff") {
-      staffStore.searchStaff(value);
-    } else if (currentNav.value == "Activity") {
-      activityStore.searchActivity(value);
-    } else {
-      staffActivityStore.searchStaffActivity(value);
-    }
+  if (currentNav.value == "Organization") {
+    organizationStore.fetchOrganizations(route.params.categoryId, value);
+  } else if (currentNav.value == "Staff") {
+    staffStore.fetchStaff(route.params.organizationId, value);
+  } else {
+    activityStore.fetchActivities(route.params.organizationId, value);
   }
 }, 500);
 
 const handleSearchChange = (value: string) => {
   search.value = value;
-  if (value.length > 0) {
-    debouncedSearch(value);
-  } else {
-    if (currentNav.value == "Categories") {
-      categoriesStore.fetchCategories();
-    } else if (currentNav.value == "Organization") {
-      organizationStore.fetchOrganizations(route.params.categoryId);
-    } else if (currentNav.value == "Staff") {
-      staffStore.fetchStaff(route.params.organizationId);
-    } else if (currentNav.value == "Activity") {
-      activityStore.fetchActivities(route.params.organizationId);
-    } else {
-      staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId);
-    }
-  }
+  debouncedSearch(value);
 };
 
 watch(currentNav, () => {
@@ -160,12 +142,13 @@ watch(currentNav, () => {
       :placeholder="`Search ${currentNav}`"
       clearable
       class="w-[250px]"
+      v-if="currentNav && hasSearch.includes(currentNav)"
     >
       <template #prefix>
         <el-icon><Search /></el-icon>
       </template>
     </el-input>
-    <el-popover trigger="click" :width="200">
+    <el-popover trigger="click" :width="200" v-if="currentNav && hasFilter.includes(currentNav)">
       <template #reference>
         <el-button>
           <div class="flex gap-[5px] items-center">
@@ -174,7 +157,28 @@ watch(currentNav, () => {
           </div>
         </el-button>
       </template>
-      <div class="flex flex-col gap-2"></div>
+      <div class="flex flex-col gap-2">
+        <el-checkbox
+          :indeterminate="isIndeterminate"
+          v-model="checkAll"
+          @change="handleCheckAllChange"
+        >
+          Filter All
+        </el-checkbox>
+        <el-checkbox-group
+          v-model="categoriesStore.checkedFilters"
+          @change="handleCheckedFiltersChange"
+        >
+          <el-checkbox
+            v-for="filter in categoriesStore.filters"
+            :key="filter"
+            :label="filter"
+            :value="filter"
+          >
+            {{ filter }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </div>
     </el-popover>
     <el-button
       type="primary"

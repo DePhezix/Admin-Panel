@@ -37,13 +37,15 @@ export const useStaffStore = defineStore("staff", () => {
     }
   }
 
-  const fetchStaff = async (organizationId: string | string[] | undefined) => {
+  const fetchStaff = async (organizationId: string | string[] | undefined, staffName?: string) => {
     loading.value = true;
 
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/staff?page=${
         currentPage.value > 1 ? currentPage.value : 1
-      }&limit=${pageSize.value * pageSizeMultiple.value}&org_id=${organizationId}`,
+      }&limit=${pageSize.value * pageSizeMultiple.value}&org_id=${organizationId}${
+        staffName ? `&search=${staffName}` : ""
+      }`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
@@ -83,15 +85,6 @@ export const useStaffStore = defineStore("staff", () => {
     }
   }
 
-  async function searchStaff(staffID: string | LocationQueryValue[]) {
-    staff.value = [];
-    const response = await findStaff(staffID);
-
-    if (response) {
-      staff.value[0] = response;
-    }
-  }
-
   return {
     loading,
     totalStaff,
@@ -102,6 +95,5 @@ export const useStaffStore = defineStore("staff", () => {
     setCurrentPage,
     findStaff,
     fetchStaff,
-    searchStaff,
   };
 });

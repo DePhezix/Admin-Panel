@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { watch, ref, computed } from "vue";
 import { useAuthStore } from "./auth";
 import type { LocationQueryValue } from "vue-router";
 import axios from "axios";
@@ -29,6 +29,12 @@ export const useCategoriesStore = defineStore("categories", () => {
   const pageSizeMultiple = ref<number>(1);
   const totalCategories = ref<number>(0);
 
+  const filters = ref<string[]>(["Active", "Inactive"]);
+  const checkedFilters = ref<string[]>(filters.value);
+  const setCheckedFilters = (newFilter: string[]) => {
+    checkedFilters.value = newFilter;
+  };
+
   if (pageSize.value < 50 && pageSize.value >= 1) {
     while (pageSize.value * pageSizeMultiple.value < 50) {
       pageSizeMultiple.value++;
@@ -41,7 +47,11 @@ export const useCategoriesStore = defineStore("categories", () => {
       const response = await axios.get<responseType>(
         `https://crm.humaid.co/api/category?page=${
           currentPage.value > 1 ? currentPage.value / pageSizeMultiple.value : 1
-        }&limit=${pageSize.value * pageSizeMultiple.value}`,
+        }&limit=${pageSize.value * pageSizeMultiple.value}${
+          checkedFilters.value.length === 1
+            ? `&active=${checkedFilters.value.includes("Active")}`
+            : ""
+        }`,
         {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
@@ -95,6 +105,15 @@ export const useCategoriesStore = defineStore("categories", () => {
     }
   }
 
+  watch(checkedFilters, () => {
+    if (checkedFilters.value.length === 0) {
+      categories.value = [];
+      return;
+    }
+    currentPage.value = 1;
+    fetchCategories();
+  });
+
   return {
     loading,
     totalCategories,
@@ -102,9 +121,12 @@ export const useCategoriesStore = defineStore("categories", () => {
     displayedCategories,
     pageSize,
     currentPage,
+    filters,
+    checkedFilters,
     setCurrentPage,
     findCategory,
     fetchCategories,
     searchCategory,
+    setCheckedFilters
   };
 });

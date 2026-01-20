@@ -34,13 +34,18 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     }
   }
 
-  const fetchOrganizations = async (categoryId: string | string[] | undefined) => {
+  const fetchOrganizations = async (
+    categoryId: string | string[] | undefined,
+    organizationName?: string
+  ) => {
     loading.value = true;
 
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/organization?page=${
         currentPage.value > 1 ? currentPage.value : 1
-      }&limit=${pageSize.value * pageSizeMultiple.value}&category_id=${categoryId}`,
+      }&limit=${pageSize.value * pageSizeMultiple.value}&category_id=${categoryId}${
+        organizationName ? `&search=${organizationName}` : ''
+      }`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
@@ -85,15 +90,6 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     }
   }
 
-  async function searchOrganization(organizationID: string | LocationQueryValue[]) {
-    organizations.value = [];
-    const response = await findOrganization(organizationID);
-
-    if (response) {
-      organizations.value[0] = response;
-    }
-  }
-
   return {
     loading,
     totalOrganizations,
@@ -104,6 +100,5 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     setCurrentPage,
     findOrganization,
     fetchOrganizations,
-    searchOrganization,
   };
 });

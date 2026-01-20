@@ -38,7 +38,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
 
   const fetchStaffActivity = async (
     organizationId: string | string[] | undefined,
-    staffId: string | string[] | undefined
+    staffId: string | string[] | undefined,
   ) => {
     loading.value = true;
 
@@ -92,15 +92,6 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     }
   }
 
-  async function searchStaffActivity(staffActivityID: string | LocationQueryValue[]) {
-    staffActivity.value = [];
-    const response = await findStaffActivity(staffActivityID);
-
-    if (response) {
-      staffActivity.value[0] = response;
-    }
-  }
-
   return {
     loading,
     totalStaffActivity,
@@ -111,6 +102,5 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     setCurrentPage,
     findStaffActivity,
     fetchStaffActivity,
-    searchStaffActivity,
   };
 });

@@ -34,13 +34,18 @@ export const useActivitiesStore = defineStore("activities", () => {
     }
   }
 
-  const fetchActivities = async (organizationId: string | string[] | undefined) => {
+  const fetchActivities = async (
+    organizationId: string | string[] | undefined,
+    activityName?: string
+  ) => {
     loading.value = true;
 
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/activity?page=${
         currentPage.value > 1 ? currentPage.value : 1
-      }&limit=${pageSize.value * pageSizeMultiple.value}&org_id=${organizationId}`,
+      }&limit=${pageSize.value * pageSizeMultiple.value}&org_id=${organizationId}${
+        activityName ? `&search=${activityName}` : ""
+      }`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
@@ -83,15 +88,6 @@ export const useActivitiesStore = defineStore("activities", () => {
     }
   }
 
-  async function searchActivity(activityID: string | null) {
-    activities.value = [];
-    const response = await findActivity(activityID);
-
-    if (response) {
-      activities.value[0] = response;
-    }
-  }
-
   return {
     loading,
     totalActivities,
@@ -102,6 +98,5 @@ export const useActivitiesStore = defineStore("activities", () => {
     setCurrentPage,
     findActivity,
     fetchActivities,
-    searchActivity,
   };
 });
