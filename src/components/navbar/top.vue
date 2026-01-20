@@ -68,9 +68,9 @@ const CurrentDialogComponent = computed(() => {
 
 const authorized = computed<boolean>(() => {
   /*   if (currentNav.value === "organizations") {
-    return authStore.userRole === "admin";
+    return authStore.userData.role === "admin";
   } else { */
-  return authStore.userRole === "admin" || authStore.userRole === "agent";
+  return authStore.userData.role === "admin" || authStore.userData.role === "agent";
   /*   }
    */
 });

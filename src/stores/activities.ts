@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { watch, ref, computed } from "vue";
 import { useAuthStore } from "./auth";
 import axios from "axios";
-import type { LocationQueryValue } from "vue-router";
 
 interface activityType {
   id: string;
@@ -59,9 +58,7 @@ export const useActivitiesStore = defineStore("activities", () => {
     currentPage.value = page;
   };
 
-  async function findActivity(
-    activityID: string | null
-  ): Promise<activityType | undefined> {
+  async function findActivity(activityID: string | null): Promise<activityType | undefined> {
     const response = await axios.get<activityType>(
       `https://crm.humaid.co/api/activity/${activityID}`,
       {

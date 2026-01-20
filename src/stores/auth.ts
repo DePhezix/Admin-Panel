@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, reactive, computed } from "vue";
 import { sha256 } from "js-sha256";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -12,27 +12,41 @@ interface loginResponse {
 }
 
 interface userData {
-  id: string;
-  name: string;
-  email: string;
-  role: userTypes;
-  surname: string;
-  created_at: string;
-  email_verified: boolean;
-  language: string;
+  id: string | null;
+  name: string | null;
+  email: string | null;
+  role: userTypes | null;
+  surname: string | null;
+  created_at: string | null;
+  email_verified: boolean | null;
+  language: string | null;
 }
 
 export const useAuthStore = defineStore("auth", () => {
   const hash = sha256.create();
 
-  const userRole = ref<userTypes>(null);
   const token = ref<string | null>(null);
+  const loading = ref<boolean>(true);
 
-  const isAuthenticated = computed<boolean>(() => !!userRole.value);
+  const noUser: userData = {
+    id: null,
+    name: null,
+    email: null,
+    role: null,
+    surname: null,
+    created_at: null,
+    email_verified: null,
+    language: null,
+  };
+
+  const userData = reactive<userData>(noUser);
+
+  const isAuthenticated = computed<boolean>(() => !!userData.role);
 
   async function initAuth() {
     const savedToken = Cookies.get("token");
     if (savedToken) {
+      loading.value = true;
       token.value = savedToken;
       try {
         const userDataResponse = await axios.get<userData>(
@@ -43,53 +57,63 @@ export const useAuthStore = defineStore("auth", () => {
             },
           }
         );
-        userRole.value = userDataResponse.data.role;
+
+        Object.assign(userData, userDataResponse.data);
       } catch (error) {
         console.error("Failed to fetch user data during initAuth:", error);
         token.value = null;
-        userRole.value = null;
+        Object.assign(userData, noUser);
         Cookies.remove("token");
+      } finally {
+        loading.value = false;
       }
     }
   }
 
   async function loginUser(email: string, password: string) {
     try {
+      loading.value = true;
       hash.update(password);
-      
+
       const response = await axios.post<loginResponse>("https://crm.humaid.co/api/auth/login", {
         email,
         password: hash.hex(),
       });
 
       token.value = response.data.access_token;
-      const userData = await axios.get<userData>("https://crm.humaid.co/api/auth/get-user", {
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      });
+      const userResponseData = await axios.get<userData>(
+        "https://crm.humaid.co/api/auth/get-user",
+        {
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        }
+      );
 
-      userRole.value = userData.data.role;
+      Object.assign(userData, userResponseData.data);
       Cookies.set("token", token.value);
 
       return response.data;
     } catch (error) {
       console.error("Login error:", error);
       throw new Error("Failed to login");
+    } finally {
+      loading.value = false;
     }
   }
 
   function signOutUser() {
-    userRole.value = null;
-    Cookies.remove("role");
+    Object.assign(userData, noUser);
+    Cookies.remove("token");
   }
 
-  return {
+return {
     isAuthenticated,
-    userRole,
+    userData,
     token,
+    loading,
     signOutUser,
     loginUser,
-    initAuth
+    initAuth,
   };
 });

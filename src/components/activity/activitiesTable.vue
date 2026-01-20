@@ -68,7 +68,7 @@ const handlePageChange = (page: number) => {
         align="right"
         min-width="120"
         label="Actions"
-        v-if="authStore.userRole === 'admin' || authStore.userRole === 'agent'"
+        v-if="authStore.userData.role === 'admin' || authStore.userData.role === 'agent'"
       >
         <template #default="scope">
           <ActivityActions :name="scope.row.name" :id="scope.row.id" />

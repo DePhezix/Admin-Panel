@@ -94,7 +94,7 @@ const handleRowClick = (e: rowEvent) => {
         align="right"
         min-width="120"
         label="Actions"
-        v-if="authStore.userRole === 'admin'"
+        v-if="authStore.userData.role === 'admin'"
       >
         <template #default="scope">
           <OrganizationActions :name="scope.row.name" :org_id="scope.row.id" />

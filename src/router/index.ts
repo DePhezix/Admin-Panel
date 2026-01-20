@@ -28,7 +28,7 @@ const routes = [
       {
         path: "sessions",
         name: "sessions",
-        component: () => import("@/views/workerSession.vue"),
+        component: () => import("@/views/sessions.vue"),
       },
       {
         path: "categories",
@@ -75,7 +75,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  if (!authStore.userRole && Cookies.get("token")) {
+  if (!authStore.userData.role && Cookies.get("token")) {
     await authStore.initAuth();
   }
 

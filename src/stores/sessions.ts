@@ -36,11 +36,13 @@ export const useSessionsStore = defineStore("sessions", () => {
 
   const sessions = ref<workerSessionType[]>([]);
 
+  const loading = ref<boolean>(true)
+
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 42.2) - 6);
   const totalSessions = ref<number>(0);
-
   const pageSizeMultiple = ref<number>(1);
+
   const filters = ref<string[]>(["Active", "Inactive"]);
   const checkedFilters = ref<string[]>(filters.value);
   const setCheckedFilters = (newFilter: string[]) => {
@@ -54,6 +56,7 @@ export const useSessionsStore = defineStore("sessions", () => {
   }
 
   const fetchSessions = async () => {
+    loading.value = true
     try {
       const response = await axios.get<responseType>(
         `https://crm.humaid.co/api/worker-session?page=${
@@ -70,6 +73,8 @@ export const useSessionsStore = defineStore("sessions", () => {
       totalSessions.value = response.data.total;
     } catch (error) {
       console.error("Error fetching sessions:", error);
+    } finally {
+      loading.value = false
     }
   };
 
@@ -81,6 +86,12 @@ export const useSessionsStore = defineStore("sessions", () => {
     currentPage.value = 1;
     fetchSessions();
   });
+
+  watch(currentPage, () => {
+    if (currentPage.value * pageSize.value == currentPage.value * pageSizeMultiple.value) {
+      fetchSessions()
+    }
+  })
 
   const displayedSessions = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
@@ -97,6 +108,7 @@ export const useSessionsStore = defineStore("sessions", () => {
   };
 
   return {
+    loading,
     totalSessions,
     sessions,
     currentPage,

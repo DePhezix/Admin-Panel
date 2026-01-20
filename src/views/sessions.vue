@@ -3,6 +3,7 @@ import { watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import WorkSessionActions from "@/components/workerSession/workSessionActions.vue";
 import { useSessionsStore } from "@/stores/sessions";
+import { ElMessage } from "element-plus";
 
 const router = useRouter();
 const route = useRoute();
@@ -27,13 +28,17 @@ const handlePageChange = (page: number) => {
 };
 
 onMounted(async () => {
-  await sessionsStore.fetchSessions();
+  try {
+    await sessionsStore.fetchSessions();
+  } catch (err) {
+    ElMessage.error("Failed to get data from server. Please try again later.");
+  }
 });
 </script>
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table :data="sessionsStore.displayedSessions" show-overflow-tooltip class="w-full">
+    <el-table v-loading="sessionsStore.loading" :data="sessionsStore.displayedSessions" show-overflow-tooltip class="w-full">
       <el-table-column fixed prop="id" label="Session ID" width="180" />
       <el-table-column prop="worker.name" label="Worker" width="200" />
       <el-table-column prop="activity.name" label="Activity" width="180" />
