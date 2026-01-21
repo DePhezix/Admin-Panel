@@ -100,6 +100,29 @@ export const useActivitiesStore = defineStore("activities", () => {
     }
   };
 
+  const updateActivity = async (activityId: string, org_id?: string | string[], name?: string) => {
+    loading.value = true;
+
+    try {
+      await axios.put(
+        `https://crm.humaid.co/api/activity/${activityId}`,
+        {
+          org_id,
+          name,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+    } catch (err) {
+      throw Error('failed activity update: ' + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const displayedActivities = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
@@ -142,5 +165,6 @@ export const useActivitiesStore = defineStore("activities", () => {
     fetchActivities,
     createActivity,
     deleteActivity,
+    updateActivity
   };
 });

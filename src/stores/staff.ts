@@ -23,8 +23,8 @@ export const useStaffStore = defineStore("staff", () => {
   const authStore = useAuthStore();
 
   const staff = ref<staffType[]>([]);
-  
-  const fetched = ref<boolean>(false)
+
+  const fetched = ref<boolean>(false);
   const loading = ref<boolean>(true);
 
   const currentPage = ref(1);
@@ -54,7 +54,7 @@ export const useStaffStore = defineStore("staff", () => {
       }
     );
 
-    fetched.value = true
+    fetched.value = true;
     loading.value = false;
 
     totalStaff.value = response.data.total;
@@ -89,8 +89,25 @@ export const useStaffStore = defineStore("staff", () => {
     loading.value = true;
 
     try {
-      await axios.delete(
+      await axios.delete(`https://crm.humaid.co/api/staff/${staffId}`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+    } catch (err) {
+      throw Error("delete staff failed! " + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updateStaff = async (staffId: string, name?: string, surname?: string, org_id?: string | string[]) => {
+    loading.value = true;
+
+    try {
+      await axios.put(
         `https://crm.humaid.co/api/staff/${staffId}`,
+        { name, surname, org_id },
         {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
@@ -98,7 +115,7 @@ export const useStaffStore = defineStore("staff", () => {
         }
       );
     } catch (err) {
-      throw Error("delete staff failed! " + err);
+      throw Error("update staff failed! " + err);
     } finally {
       loading.value = false;
     }
@@ -142,6 +159,7 @@ export const useStaffStore = defineStore("staff", () => {
     findStaff,
     fetchStaff,
     createStaff,
-    deleteStaff
+    deleteStaff,
+    updateStaff
   };
 });

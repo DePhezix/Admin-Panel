@@ -64,7 +64,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     loading.value = false;
 
     totalStaffActivity.value = response.data.total;
-    staffActivity.value = []
+    staffActivity.value = [];
 
     response.data.data.map(async (data) => {
       let activityName = "";
@@ -132,6 +132,35 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     }
   };
 
+  const updateStaffActivity = async (
+    staffActivityId: string,
+    activity_id?: string,
+    worker_id?: string | string[],
+    org_id?: string | string[]
+  ) => {
+    loading.value = true;
+
+    try {
+      axios.put(
+        `https://crm.humaid.co/api/staff-activity/${staffActivityId}`,
+        {
+          activity_id,
+          worker_id,
+          org_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+    } catch (err) {
+      throw Error("Failed to delete! " + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const displayedStaffActivity = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
@@ -174,6 +203,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     findStaffActivity,
     fetchStaffActivity,
     createStaffActivity,
-    deleteStaffActivity
+    deleteStaffActivity,
+    updateStaffActivity
   };
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { computed, ref, reactive } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { EditPen, Delete } from "@element-plus/icons-vue";
 import { useOrganizationsStore } from "@/stores/organizations";
@@ -14,6 +14,11 @@ const props = defineProps({
 interface formType {
   name: string;
   orgName: string | string[];
+}
+
+interface optionsType {
+  label: string;
+  value: string;
 }
 
 const route = useRoute();
@@ -37,9 +42,28 @@ const handleClose = () => {
   resetForm();
 };
 
-const handleEdit = (event: Event) => {
+const handleEditOpen = (event: Event) => {
   event.stopPropagation();
   editOpen.value = true;
+};
+
+const handleEditConfirm = async () => {
+  if (props.id) {
+    try {
+      await activitiesStore.updateActivity(props.id, form.orgName, form.name);
+      editOpen.value = false;
+      ElMessage({
+        type: "success",
+        message: "Updated Activity",
+      });
+
+      await activitiesStore.fetchActivities(route.params.organizationId);
+    } catch {
+      ElMessage.error("Failed to update activity");
+    }
+  } else {
+    editOpen.value = false;
+  }
 };
 
 const deleteActivity = () => {
@@ -61,7 +85,7 @@ const deleteActivity = () => {
             type: "success",
             message: "Deleted Activity",
           });
-          
+
           await activitiesStore.fetchActivities(route.params.organizationId);
         } catch {
           ElMessage.error("Failed to delete activity");
@@ -75,14 +99,30 @@ const deleteActivity = () => {
       });
     });
 };
+
+const options = computed<optionsType[]>(() => {
+  const tempOptions: optionsType[] = [];
+  organizationsStore.organizations.forEach((organization) => {
+    const option: optionsType = {
+      label: "",
+      value: "",
+    };
+    option.label = organization.name;
+    option.value = organization.id;
+
+    tempOptions.push(option);
+  });
+
+  return tempOptions;
+});
 </script>
 
 <template>
   <el-button-group direction="horizontal">
-    <el-button :icon="EditPen" @click="handleEdit" />
+    <el-button :icon="EditPen" @click="handleEditOpen" />
     <el-button :icon="Delete" type="danger" @click="deleteActivity" />
   </el-button-group>
-  <el-dialog v-model="editOpen" title="Edit Activity" @close="handleClose" append-to-body>
+  <el-dialog v-model="editOpen" title="Edit Activity" :before-close="handleClose" append-to-body>
     <el-form :model="form" label-width="150px">
       <el-form-item label="Activity ID">
         <el-input :value="id" disabled>
@@ -93,20 +133,13 @@ const deleteActivity = () => {
         <el-input v-model="form.name" />
       </el-form-item>
       <el-form-item label="Organization">
-        <el-select v-model="form.orgName">
-          <el-option
-            v-for="(item, index) in organizationsStore.organizations"
-            :key="index"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <el-select-v2 v-model="form.orgName" :options="options" />
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">Cancel</el-button>
-        <el-button type="primary" @click="editOpen = false"> Confirm </el-button>
+        <el-button type="primary" @click="handleEditConfirm" :loading="activitiesStore.loading"> Confirm </el-button>
       </div>
     </template>
   </el-dialog>

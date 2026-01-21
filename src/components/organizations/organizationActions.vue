@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { computed, ref, reactive } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, EditPen } from "@element-plus/icons-vue";
 
@@ -14,27 +14,28 @@ const props = defineProps({
 
 interface formType {
   name: string;
-  categoryName: string;
+  categoryName: string | string[] | undefined;
+}
+
+interface optionsType {
+  label: string;
+  value: string;
 }
 
 const route = useRoute();
 const categoriesStores = useCategoriesStore();
 const organizationStore = useOrganizationsStore();
 
-const currentCategory = route.params.categoryId
-  ? categoriesStores.findCategory(route.params.categoryId)?.name
-  : undefined;
-
 const editOpen = ref<boolean>(false);
 
 const form = reactive<formType>({
   name: props.name ?? "",
-  categoryName: currentCategory ?? "",
+  categoryName: route.params.categoryId,
 });
 
 const resetForm = () => {
   form.name = props.name ?? "";
-  form.categoryName = currentCategory ?? "";
+  form.categoryName = route.params.categoryId;
 };
 
 const handleclose = () => {
@@ -75,23 +76,53 @@ const deleteOrganization = async (e: Event) => {
     });
 };
 
-const handleEdit = (event: Event) => {
+const handleEditOpen = (event: Event) => {
   event.stopPropagation();
   editOpen.value = true;
+};
+
+const options = computed<optionsType[]>(() => {
+  const tempOptions: optionsType[] = [];
+  categoriesStores.categories.forEach((category) => {
+    const option: optionsType = {
+      label: "",
+      value: "",
+    };
+    option.label = category.name;
+    option.value = category.id;
+
+    tempOptions.push(option);
+  });
+
+  return tempOptions;
+});
+
+const handleEditConfirm = async () => {
+  if (props.org_id) {
+    try {
+      await organizationStore.updateOrganization(props.org_id, form.categoryName, form.name);
+      editOpen.value = false;
+      ElMessage({
+        type: "success",
+        message: "Updated Organization",
+      });
+
+      await organizationStore.fetchOrganizations(route.params.categoryId)
+    } catch {
+      ElMessage.error("Failed to update organization");
+    }
+  } else {
+    editOpen.value = false;
+  }
 };
 </script>
 
 <template>
   <el-button-group direction="horizontal">
-    <el-button :icon="EditPen" @click="handleEdit" />
+    <el-button :icon="EditPen" @click="handleEditOpen" />
     <el-button :icon="Delete" type="danger" @click="deleteOrganization" />
   </el-button-group>
-  <el-dialog
-    v-model="editOpen"
-    title="Edit Organization"
-    :before-close="handleclose"
-    append-to-body
-  >
+  <el-dialog v-model="editOpen" title="Edit Organization" :before-close="handleclose" append-to-body>
     <el-form :model="form" label-width="150px">
       <el-form-item label="Organization ID">
         <el-input :value="org_id" disabled>
@@ -102,20 +133,13 @@ const handleEdit = (event: Event) => {
         <el-input v-model="form.name" />
       </el-form-item>
       <el-form-item label="Category">
-        <el-select v-model="form.categoryName">
-          <el-option
-            v-for="(item, index) in categoriesStores.categories"
-            :key="index"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <el-select-v2 v-model="form.categoryName" :options="options" />
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleclose">Cancel</el-button>
-        <el-button type="primary" @click="editOpen = false"> Confirm </el-button>
+        <el-button type="primary" @click="handleEditConfirm" :loading="organizationStore.loading"> Confirm </el-button>
       </div>
     </template>
   </el-dialog>

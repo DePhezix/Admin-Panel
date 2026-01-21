@@ -40,7 +40,7 @@ onMounted(async () => {
       : Promise.resolve(),
     route.params.staffId
       ? staffStore.findStaff(route.params.staffId).then((staff) => {
-          currentStaff.value = staff?.name;
+          currentStaff.value = staff?.name + " " +  staff?.surname;
         })
       : Promise.resolve(),
     staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId),
@@ -100,6 +100,7 @@ const handlePageChange = (page: number) => {
           <StaffActivityActions
             :staff_activity_id="scope.row.id"
             :activity_id="scope.row.activity_id"
+            :activity_name="scope.row.activity_name"
           />
         </template>
       </el-table-column>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { computed, ref, reactive } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { EditPen, Delete } from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
@@ -7,10 +7,12 @@ import { useRoute } from "vue-router";
 import { useStaffStore } from "@/stores/staff";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useStaffActivityStore } from "@/stores/staffActivity";
+import { useActivitiesStore } from "@/stores/activities";
 
 const props = defineProps({
   staff_activity_id: String,
   activity_id: String,
+  activity_name: String,
 });
 
 interface formType {
@@ -19,24 +21,29 @@ interface formType {
   orgName: string | string[];
 }
 
+interface optionsType {
+  label: string;
+  value: string;
+}
+
 const route = useRoute();
 
 const staffStore = useStaffStore();
 const organizationStore = useOrganizationsStore();
 const staffActivityStore = useStaffActivityStore();
+const activitiesStore = useActivitiesStore();
 
 const editOpen = ref<boolean>(false);
-const activityName: string | undefined = "";
 
 const form = reactive<formType>({
   workerName: route.params.staffId ?? "",
-  activityName: activityName ?? "",
+  activityName: props.activity_name ?? "",
   orgName: route.params.organizationId ?? "",
 });
 
 const resetForm = () => {
   form.workerName = route.params.staffId ?? "";
-  form.activityName = activityName ?? "";
+  form.activityName = props.activity_name ?? "";
   form.orgName = route.params.organizationId ?? "";
 };
 
@@ -45,7 +52,7 @@ const handleClose = () => {
   resetForm();
 };
 
-const handleEdit = (event: Event) => {
+const handleEditOpen = (event: Event) => {
   event.stopPropagation();
   editOpen.value = true;
 };
@@ -69,8 +76,11 @@ const deleteStaffActivity = () => {
             type: "success",
             message: "Delete completed",
           });
-          
-          await staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId)
+
+          await staffActivityStore.fetchStaffActivity(
+            route.params.organizationId,
+            route.params.staffId
+          );
         } catch {
           ElMessage.error("Failed to delete staff activity");
         }
@@ -83,11 +93,86 @@ const deleteStaffActivity = () => {
       });
     });
 };
+
+const handleEditConfirm = async () => {
+  if (props.staff_activity_id) {
+    try {
+      await staffActivityStore.updateStaffActivity(
+        props.staff_activity_id,
+        form.activityName,
+        form.workerName,
+        form.orgName
+      );
+      editOpen.value = false;
+      ElMessage({
+        type: "success",
+        message: "Updated Staff Activity",
+      });
+
+      await staffActivityStore.fetchStaffActivity(
+        route.params.organizationId,
+        route.params.staffId
+      );
+    } catch {
+      ElMessage.error("Failed to update staff activity");
+    }
+  } else {
+    editOpen.value = false;
+  }
+};
+
+const organizationOptions = computed<optionsType[]>(() => {
+  const tempOptions: optionsType[] = [];
+  organizationStore.organizations.forEach((organization) => {
+    const option: optionsType = {
+      label: "",
+      value: "",
+    };
+    option.label = organization.name;
+    option.value = organization.id;
+
+    tempOptions.push(option);
+  });
+
+  return tempOptions;
+});
+
+const staffOptions = computed<optionsType[]>(() => {
+  const tempOptions: optionsType[] = [];
+  staffStore.staff.forEach((st) => {
+    const option: optionsType = {
+      label: "",
+      value: "",
+    };
+    option.label = st.name + " " + st.surname;
+    option.value = st.id;
+
+    tempOptions.push(option);
+  });
+
+  return tempOptions;
+});
+
+const activityOptions = computed<optionsType[]>(() => {
+  const tempOptions: optionsType[] = [];
+  activitiesStore.activities.forEach((activity) => {
+    const option: optionsType = {
+      label: "",
+      value: "",
+    };
+    option.label = activity.name;
+    option.value = activity.id;
+
+    tempOptions.push(option);
+  });
+
+  return tempOptions;
+});
 </script>
 
 <template>
   <el-button-group direction="horizontal">
-    <el-button :icon="EditPen" @click="handleEdit" />
+    <el-button :icon="EditPen" @click="handleEditOpen" />
     <el-button :icon="Delete" type="danger" @click="deleteStaffActivity" />
   </el-button-group>
   <el-dialog v-model="editOpen" title="Edit Staff Activity" @close="handleClose" append-to-body>
@@ -98,40 +183,21 @@ const deleteStaffActivity = () => {
         </el-input>
       </el-form-item>
       <el-form-item label="Activity">
-        <el-select v-model="form.activityName">
-          <!--           <el-option
-            v-for="(item, index) "
-            :key="index"
-            :label="item"
-            :value="item"
-          /> -->
-        </el-select>
+        <el-select-v2 v-model="form.activityName" :options="activityOptions" />
       </el-form-item>
       <el-form-item label="Assigned to">
-        <el-select v-model="form.workerName">
-          <el-option
-            v-for="(item, index) in staffStore.staff"
-            :key="index"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <el-select-v2 v-model="form.workerName" :options="staffOptions" />
       </el-form-item>
       <el-form-item label="Organization">
-        <el-select v-model="form.orgName">
-          <el-option
-            v-for="(item, index) in organizationStore.organizations"
-            :key="index"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <el-select-v2 v-model="form.orgName" :options="organizationOptions" />
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">Cancel</el-button>
-        <el-button type="primary" @click="editOpen = false"> Confirm </el-button>
+        <el-button type="primary" @click="handleEditConfirm" :loading="staffActivityStore.loading">
+          Confirm
+        </el-button>
       </div>
     </template>
   </el-dialog>

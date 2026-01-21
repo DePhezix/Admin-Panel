@@ -93,6 +93,29 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     }
   };
 
+  const updateOrganization = async (
+    organizationId: string,
+    category_id?: string | string[],
+    name?: string
+  ) => {
+    loading.value = true;
+    try {
+      await axios.put(
+        `https://crm.humaid.co/api/organization/${organizationId}`,
+        { category_id, name },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+    } catch (err) {
+      throw Error("failed to delete organization: " + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const displayedOrganizations = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
@@ -137,5 +160,6 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     fetchOrganizations,
     createOrganization,
     deleteOrganization,
+    updateOrganization
   };
 });
