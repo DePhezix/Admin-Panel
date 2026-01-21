@@ -18,10 +18,12 @@ const router = useRouter();
 const collapsedNav = ref<boolean>(false);
 
 const currentNavIdx = computed<number>(() => {
-  const currentPath = route.path;
+  const currentPath = route.path.split("_").join(" ").slice(1);
   const idxOfPath = !currentPath.includes("categories")
   ? sideNavigationArr.findIndex((item) => item === currentPath)
   : 1;
+
+  console.log(idxOfPath)
 
   return idxOfPath;
 });
