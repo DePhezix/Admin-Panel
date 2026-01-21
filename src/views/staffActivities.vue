@@ -44,9 +44,6 @@ onMounted(async () => {
         })
       : Promise.resolve(),
     staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId),
-    staffActivityStore.staffActivity.map((staffAct) => {
-      activitiesStore.findActivity(staffAct.activity_id);
-    }),
   ]);
 });
 
@@ -63,7 +60,7 @@ const handlePageChange = (page: number) => {
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
     <el-table
-      v-loading="staffActivityStore.loading && activitiesStore.loading"
+      v-loading="staffActivityStore.loading"
       :data="staffActivityStore.displayedStaffActivity"
     >
       <el-table-column label="Organization" show-overflow-tooltip>
@@ -82,7 +79,12 @@ const handlePageChange = (page: number) => {
         </template>
       </el-table-column>
 
-      <el-table-column label="Activity" class="cursor-pointer" show-overflow-tooltip />
+      <el-table-column
+        prop="activity_name"
+        label="Activity"
+        class="cursor-pointer"
+        show-overflow-tooltip
+      />
 
       <el-table-column prop="id" label="Staff Activity ID" show-overflow-tooltip />
 

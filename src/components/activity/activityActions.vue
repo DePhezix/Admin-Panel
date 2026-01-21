@@ -3,6 +3,7 @@ import { ref, reactive } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { EditPen, Delete } from "@element-plus/icons-vue";
 import { useOrganizationsStore } from "@/stores/organizations";
+import { useActivitiesStore } from "@/stores/activities";
 import { useRoute } from "vue-router";
 
 const props = defineProps({
@@ -12,22 +13,23 @@ const props = defineProps({
 
 interface formType {
   name: string;
-  orgName: string;
+  orgName: string | string[];
 }
 
-const route = useRoute()
+const route = useRoute();
+
 const organizationsStore = useOrganizationsStore();
+const activitiesStore = useActivitiesStore();
 
 const editOpen = ref<boolean>(false);
-const orgName: string | undefined = route.params.organizationId ? organizationsStore.findOrganization(route.params.organizationId)?.name : undefined;
 const form = reactive<formType>({
   name: props.name ?? "",
-  orgName: orgName ?? "",
+  orgName: route.params.organizationId ?? "",
 });
 
 const resetForm = () => {
   form.name = props.name ?? "";
-  form.orgName = orgName ?? "";
+  form.orgName = route.params.organizationId ?? "";
 };
 
 const handleClose = () => {
@@ -50,11 +52,21 @@ const deleteActivity = () => {
       type: "warning",
     }
   )
-    .then(() => {
-      ElMessage({
-        type: "success",
-        message: "Delete completed",
-      });
+    .then(async () => {
+      if (props.id) {
+        try {
+          await activitiesStore.deleteActivity(props.id);
+
+          ElMessage({
+            type: "success",
+            message: "Deleted Activity",
+          });
+          
+          await activitiesStore.fetchActivities(route.params.organizationId);
+        } catch {
+          ElMessage.error("Failed to delete activity");
+        }
+      }
     })
     .catch(() => {
       ElMessage({
@@ -66,13 +78,11 @@ const deleteActivity = () => {
 </script>
 
 <template>
-  <el-button-group
-    direction="horizontal"
-  >
+  <el-button-group direction="horizontal">
     <el-button :icon="EditPen" @click="handleEdit" />
     <el-button :icon="Delete" type="danger" @click="deleteActivity" />
   </el-button-group>
-  <el-dialog v-model="editOpen" title="Edit Activity" :before-close="handleClose" append-to-body>
+  <el-dialog v-model="editOpen" title="Edit Activity" @close="handleClose" append-to-body>
     <el-form :model="form" label-width="150px">
       <el-form-item label="Activity ID">
         <el-input :value="id" disabled>

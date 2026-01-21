@@ -5,6 +5,7 @@ import { Delete, EditPen } from "@element-plus/icons-vue";
 
 import { useRoute } from "vue-router";
 import { useCategoriesStore } from "@/stores/categories";
+import { useOrganizationsStore } from "@/stores/organizations";
 
 const props = defineProps({
   name: String,
@@ -18,6 +19,7 @@ interface formType {
 
 const route = useRoute();
 const categoriesStores = useCategoriesStore();
+const organizationStore = useOrganizationsStore();
 
 const currentCategory = route.params.categoryId
   ? categoriesStores.findCategory(route.params.categoryId)?.name
@@ -40,8 +42,8 @@ const handleclose = () => {
   resetForm();
 };
 
-const deleteOrganization = (e: Event) => {
-  e.stopPropagation()
+const deleteOrganization = async (e: Event) => {
+  e.stopPropagation();
   ElMessageBox.confirm(
     `You are attempting to delete organization  #${props.org_id}. Continue?`,
     "Warning",
@@ -51,11 +53,19 @@ const deleteOrganization = (e: Event) => {
       type: "warning",
     }
   )
-    .then(() => {
-      ElMessage({
-        type: "success",
-        message: "Delete completed",
-      });
+    .then(async () => {
+      if (props.org_id) {
+        try {
+          await organizationStore.deleteOrganization(props.org_id);
+          ElMessage({
+            type: "success",
+            message: "Delete completed!",
+          });
+          await organizationStore.fetchOrganizations(route.params.categoryId);
+        } catch {
+          ElMessage.error("Delete failed!");
+        }
+      }
     })
     .catch(() => {
       ElMessage({
@@ -67,8 +77,8 @@ const deleteOrganization = (e: Event) => {
 
 const handleEdit = (event: Event) => {
   event.stopPropagation();
-  editOpen.value = true
-}
+  editOpen.value = true;
+};
 </script>
 
 <template>
@@ -76,7 +86,12 @@ const handleEdit = (event: Event) => {
     <el-button :icon="EditPen" @click="handleEdit" />
     <el-button :icon="Delete" type="danger" @click="deleteOrganization" />
   </el-button-group>
-  <el-dialog v-model="editOpen" title="Edit Organization" :before-close="handleclose" append-to-body>
+  <el-dialog
+    v-model="editOpen"
+    title="Edit Organization"
+    :before-close="handleclose"
+    append-to-body
+  >
     <el-form :model="form" label-width="150px">
       <el-form-item label="Organization ID">
         <el-input :value="org_id" disabled>

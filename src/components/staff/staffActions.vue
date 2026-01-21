@@ -5,6 +5,7 @@ import { Delete, EditPen } from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
 
 import { useOrganizationsStore } from "@/stores/organizations";
+import { useStaffStore } from "@/stores/staff";
 
 const props = defineProps({
   worker_id: String,
@@ -18,15 +19,18 @@ interface formType {
   orgName: string | undefined;
 }
 
-const route = useRoute()
-const organizationStore = useOrganizationsStore()
-const orgName = route.params.organizationId ? organizationStore.findOrganization(route.params.organizationId)?.name : ""
+const route = useRoute();
+const staffStore = useStaffStore();
+const organizationStore = useOrganizationsStore();
+const orgName = route.params.organizationId
+  ? organizationStore.findOrganization(route.params.organizationId)?.name
+  : "";
 
 const editOpen = ref<boolean>(false);
 const form = reactive<formType>({
   workerName: props.name ?? "",
   workerSurname: props.surname ?? "",
-  orgName: orgName ,
+  orgName: orgName,
 });
 
 const resetForm = () => {
@@ -51,11 +55,21 @@ const deleteStaff = (e: Event) => {
       type: "warning",
     }
   )
-    .then(() => {
-      ElMessage({
-        type: "success",
-        message: "Delete completed",
-      });
+    .then(async () => {
+      if (props.worker_id) {
+        try {
+          await staffStore.deleteStaff(props.worker_id);
+
+          ElMessage({
+            type: "success",
+            message: "Delete completed",
+          });
+
+          await staffStore.fetchStaff(route.params.organizationId);
+        } catch {
+          ElMessage.error("Deleting staff failed!");
+        }
+      }
     })
     .catch(() => {
       ElMessage({
@@ -72,13 +86,11 @@ const handleEdit = (event: Event) => {
 </script>
 
 <template>
-  <el-button-group
-    direction="horizontal"
-  >
+  <el-button-group direction="horizontal">
     <el-button :icon="EditPen" @click="handleEdit" />
     <el-button :icon="Delete" type="danger" @click="deleteStaff" />
   </el-button-group>
-  <el-dialog v-model="editOpen" title="Edit Staff" :before-close="handleClose" append-to-body>
+  <el-dialog v-model="editOpen" title="Edit Staff" @close="handleClose" append-to-body>
     <el-form :model="form" label-width="150px">
       <el-form-item label="Staff ID">
         <el-input :value="worker_id" disabled>

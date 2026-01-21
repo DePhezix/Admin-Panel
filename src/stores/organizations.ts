@@ -22,6 +22,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   const organizations = ref<organizationType[]>([]);
 
   const loading = ref<boolean>(true);
+  const fetched = ref<boolean>(false);
 
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 3);
@@ -44,7 +45,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
       `https://crm.humaid.co/api/organization?page=${
         currentPage.value > 1 ? currentPage.value : 1
       }&limit=${pageSize.value * pageSizeMultiple.value}&category_id=${categoryId}${
-        organizationName ? `&search=${organizationName}` : ''
+        organizationName ? `&search=${organizationName}` : ""
       }`,
       {
         headers: {
@@ -53,10 +54,43 @@ export const useOrganizationsStore = defineStore("organizations", () => {
       }
     );
 
+    fetched.value = true;
     loading.value = false;
 
     organizations.value = response.data.data;
     totalOrganizations.value = response.data.total;
+  };
+
+  const createOrganization = async (organizationName: string, category_id?: string | string[]) => {
+    loading.value = true;
+    try {
+      await axios.post(
+        "https://crm.humaid.co/api/organization",
+        { category_id: category_id, name: organizationName },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const deleteOrganization = async (organizationId: string) => {
+    loading.value = true;
+    try {
+      await axios.delete(`https://crm.humaid.co/api/organization/${organizationId}`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+    } catch (err) {
+      throw Error("failed to delete organization: " + err);
+    } finally {
+      loading.value = false;
+    }
   };
 
   const displayedOrganizations = computed(() => {
@@ -97,8 +131,11 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     displayedOrganizations,
     pageSize,
     currentPage,
+    fetched,
     setCurrentPage,
     findOrganization,
     fetchOrganizations,
+    createOrganization,
+    deleteOrganization,
   };
 });

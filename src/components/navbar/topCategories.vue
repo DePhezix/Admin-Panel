@@ -4,24 +4,31 @@ import { useRoute } from "vue-router";
 import { watch, ref, computed, defineAsyncComponent } from "vue";
 import { ArrowRight } from "@element-plus/icons-vue";
 import { useDebounceFn } from "@vueuse/core";
-import { type CheckboxValueType } from "element-plus";
 import { useCategoriesStore } from "@/stores/categories";
 import { useOrganizationsStore } from "@/stores/organizations";
 import { useStaffStore } from "@/stores/staff";
 import { useActivitiesStore } from "@/stores/activities";
-import { useStaffActivityStore } from "@/stores/staffActivity";
+
+import { type CheckboxValueType } from "element-plus";
 
 type navigationType = "Categories" | "Organization" | "Staff" | "Activity" | "Staff Activity";
 
-const dialogComponents: Partial<Record<navigationType, ReturnType<typeof defineAsyncComponent>>> =
-  {};
+const dialogComponents: Partial<Record<navigationType, ReturnType<typeof defineAsyncComponent>>> = {
+  Organization: defineAsyncComponent(
+    () => import("@/components/organizations/createOrganization.vue")
+  ),
+  Staff: defineAsyncComponent(() => import("@/components/staff/createStaff.vue")),
+  Activity: defineAsyncComponent(() => import("@/components/activity/createActivity.vue")),
+  "Staff Activity": defineAsyncComponent(
+    () => import("@/components/staffActivity/createStaffActivity.vue")
+  ),
+};
 
 const authStore = useAuthStore();
 const categoriesStore = useCategoriesStore();
 const organizationStore = useOrganizationsStore();
 const staffStore = useStaffStore();
 const activityStore = useActivitiesStore();
-const staffActivityStore = useStaffActivityStore();
 
 const route = useRoute();
 

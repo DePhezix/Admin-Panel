@@ -13,3 +13,4 @@ const route = useRoute();
     <TopCategoires v-else-if="route.path.includes('categories')" />
   </el-header>
 </template>
+

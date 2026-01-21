@@ -6,6 +6,7 @@ import { useRoute } from "vue-router";
 
 import { useStaffStore } from "@/stores/staff";
 import { useOrganizationsStore } from "@/stores/organizations";
+import { useStaffActivityStore } from "@/stores/staffActivity";
 
 const props = defineProps({
   staff_activity_id: String,
@@ -13,31 +14,30 @@ const props = defineProps({
 });
 
 interface formType {
-  workerName: string;
+  workerName: string | string[];
   activityName: string;
-  orgName: string;
+  orgName: string | string[];
 }
 
-const route = useRoute()
+const route = useRoute();
 
 const staffStore = useStaffStore();
 const organizationStore = useOrganizationsStore();
+const staffActivityStore = useStaffActivityStore();
 
 const editOpen = ref<boolean>(false);
-const workerName: string | undefined = route.params.staffId ? staffStore.findStaff(route.params.staffId)?.name : undefined;
-const orgName: string | undefined = route.params.organizationId ? organizationStore.findOrganization(route.params.organizationId)?.name : undefined;
 const activityName: string | undefined = "";
 
 const form = reactive<formType>({
-  workerName: workerName ?? "",
+  workerName: route.params.staffId ?? "",
   activityName: activityName ?? "",
-  orgName: orgName ?? "",
+  orgName: route.params.organizationId ?? "",
 });
 
 const resetForm = () => {
-  form.workerName = workerName ?? "";
+  form.workerName = route.params.staffId ?? "";
   form.activityName = activityName ?? "";
-  form.orgName = orgName ?? "";
+  form.orgName = route.params.organizationId ?? "";
 };
 
 const handleClose = () => {
@@ -60,11 +60,21 @@ const deleteStaffActivity = () => {
       type: "warning",
     }
   )
-    .then(() => {
-      ElMessage({
-        type: "success",
-        message: "Delete completed",
-      });
+    .then(async () => {
+      if (props.staff_activity_id) {
+        try {
+          await staffActivityStore.deleteStaffActivity(props.staff_activity_id);
+
+          ElMessage({
+            type: "success",
+            message: "Delete completed",
+          });
+          
+          await staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId)
+        } catch {
+          ElMessage.error("Failed to delete staff activity");
+        }
+      }
     })
     .catch(() => {
       ElMessage({
@@ -76,13 +86,11 @@ const deleteStaffActivity = () => {
 </script>
 
 <template>
-  <el-button-group
-    direction="horizontal"
-  >
+  <el-button-group direction="horizontal">
     <el-button :icon="EditPen" @click="handleEdit" />
     <el-button :icon="Delete" type="danger" @click="deleteStaffActivity" />
   </el-button-group>
-  <el-dialog v-model="editOpen" title="Edit Staff Activity" :before-close="handleClose" append-to-body>
+  <el-dialog v-model="editOpen" title="Edit Staff Activity" @close="handleClose" append-to-body>
     <el-form :model="form" label-width="150px">
       <el-form-item label="Staff Activity ID">
         <el-input :value="staff_activity_id" disabled>
@@ -91,7 +99,7 @@ const deleteStaffActivity = () => {
       </el-form-item>
       <el-form-item label="Activity">
         <el-select v-model="form.activityName">
-<!--           <el-option
+          <!--           <el-option
             v-for="(item, index) "
             :key="index"
             :label="item"

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { useActivitiesStore } from "./activities";
 import { useAuthStore } from "./auth";
 import axios from "axios";
 import type { LocationQueryValue } from "vue-router";
@@ -18,10 +19,15 @@ interface responseType {
   limit: number;
 }
 
+interface completeStaffActivityType extends staffActivtyType {
+  activity_name: string;
+}
+
 export const useStaffActivityStore = defineStore("staffActivity", () => {
   const authStore = useAuthStore();
+  const activitiesStore = useActivitiesStore();
 
-  const staffActivity = ref<staffActivtyType[]>([]);
+  const staffActivity = ref<completeStaffActivityType[]>([]);
 
   const loading = ref<boolean>(true);
 
@@ -38,7 +44,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
 
   const fetchStaffActivity = async (
     organizationId: string | string[] | undefined,
-    staffId: string | string[] | undefined,
+    staffId: string | string[] | undefined
   ) => {
     loading.value = true;
 
@@ -58,7 +64,72 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     loading.value = false;
 
     totalStaffActivity.value = response.data.total;
-    staffActivity.value = response.data.data;
+    staffActivity.value = []
+
+    response.data.data.map(async (data) => {
+      let activityName = "";
+      if (data.activity_id) {
+        try {
+          const activity = await activitiesStore.findActivity(data.activity_id);
+          if (activity && activity.name) {
+            activityName = activity.name;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch activity ${data.activity_id}:`, error);
+        }
+      }
+
+      staffActivity.value.push({
+        id: data.id,
+        activity_id: data.activity_id,
+        activity_name: activityName,
+        worker_id: data.worker_id,
+        org_id: data.org_id,
+      });
+    });
+  };
+
+  const createStaffActivity = async (
+    activity_id: string,
+    worker_id?: string | string[],
+    org_id?: string | string[]
+  ) => {
+    loading.value = true;
+    try {
+      await axios.post(
+        "https://crm.humaid.co/api/staff-activity",
+        {
+          activity_id,
+          worker_id,
+          org_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+    } catch (err) {
+      throw Error("Failed to create staff activity! " + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const deleteStaffActivity = async (staffActivityId: string) => {
+    loading.value = true;
+
+    try {
+      axios.delete(`https://crm.humaid.co/api/staff-activity/${staffActivityId}`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+    } catch (err) {
+      throw Error("Failed to delete! " + err);
+    } finally {
+      loading.value = false;
+    }
   };
 
   const displayedStaffActivity = computed(() => {
@@ -102,5 +173,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     setCurrentPage,
     findStaffActivity,
     fetchStaffActivity,
+    createStaffActivity,
+    deleteStaffActivity
   };
 });

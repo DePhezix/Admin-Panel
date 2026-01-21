@@ -23,6 +23,7 @@ export const useCategoriesStore = defineStore("categories", () => {
   const authStore = useAuthStore();
 
   const loading = ref<boolean>(true);
+  const fetched = ref<boolean>(false);
 
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 3);
@@ -59,6 +60,7 @@ export const useCategoriesStore = defineStore("categories", () => {
         }
       );
 
+      fetched.value = true;
       categories.value = response.data.data;
       totalCategories.value = response.data.total;
     } catch (err) {
@@ -123,10 +125,11 @@ export const useCategoriesStore = defineStore("categories", () => {
     currentPage,
     filters,
     checkedFilters,
+    fetched,
     setCurrentPage,
     findCategory,
     fetchCategories,
     searchCategory,
-    setCheckedFilters
+    setCheckedFilters,
   };
 });

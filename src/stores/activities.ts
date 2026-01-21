@@ -22,6 +22,7 @@ export const useActivitiesStore = defineStore("activities", () => {
   const activities = ref<activityType[]>([]);
 
   const loading = ref<boolean>(true);
+  const fetched = ref<boolean>(false);
 
   const currentPage = ref(1);
   const pageSize = ref<number>(Math.floor(window.innerHeight / 45) - 6);
@@ -53,10 +54,50 @@ export const useActivitiesStore = defineStore("activities", () => {
       }
     );
 
+    fetched.value = true;
     loading.value = false;
 
     totalActivities.value = response.data.total;
     activities.value = response.data.data;
+  };
+
+  const createActivity = async (name: string, org_id: string | string[]) => {
+    loading.value = true;
+
+    try {
+      await axios.post(
+        "https://crm.humaid.co/api/activity",
+        {
+          name,
+          org_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        }
+      );
+    } catch (err) {
+      throw Error("Failed to create activity! " + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const deleteActivity = async (activityId: string) => {
+    loading.value = true;
+
+    try {
+      axios.delete(`https://crm.humaid.co/api/activity/${activityId}`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+    } catch (err) {
+      throw Error("Failed to delete activity! " + err);
+    } finally {
+      loading.value = false;
+    }
   };
 
   const displayedActivities = computed(() => {
@@ -89,6 +130,7 @@ export const useActivitiesStore = defineStore("activities", () => {
   }
 
   return {
+    fetched,
     loading,
     totalActivities,
     activities,
@@ -98,5 +140,7 @@ export const useActivitiesStore = defineStore("activities", () => {
     setCurrentPage,
     findActivity,
     fetchActivities,
+    createActivity,
+    deleteActivity,
   };
 });
