@@ -103,7 +103,7 @@ const staffOptions = computed<optionsType[]>(() => {
 const activityOptions = computed<optionsType[]>(() => {
   const tempOptions: optionsType[] = [];
 
-  if (props.activityId && props.activityName) {
+  if (props.activityId && (props.activityName || props.activityName == null)) {
     tempOptions.push({
       label: props.activityName,
       value: props.activityId,
