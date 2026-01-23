@@ -2,15 +2,9 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-type sideNavigationType = "dashboard" | "categories" | "equipment" | "sessions" | "settings";
+type sideNavigationType = "dashboard" | "categories" | "sessions" | "settings";
 
-const sideNavigationArr: sideNavigationType[] = [
-  "dashboard",
-  "categories",
-  "equipment",
-  "sessions",
-  "settings",
-];
+const sideNavigationArr: sideNavigationType[] = ["dashboard", "categories", "sessions", "settings"];
 
 const route = useRoute();
 const router = useRouter();
@@ -20,8 +14,8 @@ const collapsedNav = ref<boolean>(false);
 const currentNavIdx = computed<number>(() => {
   const currentPath = route.path.split("_").join(" ").slice(1);
   const idxOfPath = !currentPath.includes("categories")
-  ? sideNavigationArr.findIndex((item) => item === currentPath)
-  : 1;
+    ? sideNavigationArr.findIndex((item) => item === currentPath)
+    : 1;
 
   return idxOfPath;
 });
@@ -62,15 +56,11 @@ const handleChange = (newNavIdx: string) => {
             <template #title>Categories</template>
           </el-menu-item>
           <el-menu-item index="2">
-            <el-icon><TakeawayBox /></el-icon>
-            <template #title>Equipment</template>
-          </el-menu-item>
-          <el-menu-item index="3">
             <el-icon><Suitcase /></el-icon>
             <template #title>Sessions</template>
           </el-menu-item>
         </div>
-        <el-menu-item index="4">
+        <el-menu-item index="3">
           <el-icon><setting /></el-icon><template #title>Settings</template></el-menu-item
         >
       </el-menu>

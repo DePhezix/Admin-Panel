@@ -77,7 +77,6 @@ const handleRowClick = (e: rowEvent) => {
       </el-table-column>
       <el-table-column prop="name" label="Name" show-overflow-tooltip />
       <el-table-column prop="surname" label="Surname" show-overflow-tooltip />
-      <el-table-column prop="id" label="Staff ID" show-overflow-tooltip />
       <el-table-column
         fixed="right"
         header-align="right"

@@ -28,7 +28,7 @@ watch(
   () => route.query.page,
   (newPage) => {
     staffActivityStore.setCurrentPage(Number(newPage) || 1);
-  }
+  },
 );
 
 onMounted(async () => {
@@ -40,7 +40,7 @@ onMounted(async () => {
       : Promise.resolve(),
     route.params.staffId
       ? staffStore.findStaff(route.params.staffId).then((staff) => {
-          currentStaff.value = staff?.name + " " +  staff?.surname;
+          currentStaff.value = staff?.name + " " + staff?.surname;
         })
       : Promise.resolve(),
     staffActivityStore.fetchStaffActivity(route.params.organizationId, route.params.staffId),
@@ -85,8 +85,6 @@ const handlePageChange = (page: number) => {
         class="cursor-pointer"
         show-overflow-tooltip
       />
-
-      <el-table-column prop="id" label="Staff Activity ID" show-overflow-tooltip />
 
       <el-table-column
         fixed="right"

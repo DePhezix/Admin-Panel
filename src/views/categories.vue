@@ -54,13 +54,6 @@ onMounted(async () => {
       @row-click="handleRowClick"
       class="[&_tbody]:cursor-pointer"
     >
-      <el-table-column
-        fixed
-        prop="id"
-        label="Category ID"
-        class="cursor-pointer"
-        show-overflow-tooltip
-      />
       <el-table-column prop="name" label="Name" />
       <el-table-column prop="status" label="Status" width="180">
         <template #default="scope">

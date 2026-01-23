@@ -55,7 +55,6 @@ const handlePageChange = (page: number) => {
         </template>
       </el-table-column>
       <el-table-column prop="name" label="Activity" show-overflow-tooltip />
-      <el-table-column prop="id" label="Activity ID" show-overflow-tooltip />
       <el-table-column
         fixed="right"
         header-align="right"
