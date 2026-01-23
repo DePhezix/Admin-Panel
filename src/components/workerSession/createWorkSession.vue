@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, computed, ref, reactive } from "vue";
+import { watch, onMounted, computed, ref, reactive } from "vue";
 import { useStaffStore } from "@/stores/staff";
 import { useSessionsStore } from "@/stores/sessions";
 import { useActivitiesStore } from "@/stores/activities";
+import { useOrganizationsStore } from "@/stores/organizations";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 
 interface formType {
@@ -10,6 +11,7 @@ interface formType {
   activityName: string;
   equipmentName: string;
   active: boolean;
+  organization: string;
 }
 
 interface optionsType {
@@ -22,12 +24,14 @@ const dialogVisible = defineModel();
 const sessionStore = useSessionsStore();
 const staffStore = useStaffStore();
 const activitiesStore = useActivitiesStore();
+const organizationStore = useOrganizationsStore();
 
 const formRef = ref<FormInstance>();
 const form = reactive<formType>({
   workerName: "",
   activityName: "",
   equipmentName: "",
+  organization: "",
   active: false,
 });
 
@@ -84,6 +88,22 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   });
 };
 
+const organizationOptions = computed<optionsType[]>(() => {
+  const tempOptions: optionsType[] = [];
+  organizationStore.organizations.forEach((st) => {
+    const option: optionsType = {
+      label: "",
+      value: "",
+    };
+    option.label = st.name;
+    option.value = st.id;
+
+    tempOptions.push(option);
+  });
+
+  return tempOptions;
+});
+
 const staffOptions = computed<optionsType[]>(() => {
   const tempOptions: optionsType[] = [];
   staffStore.staff.forEach((st) => {
@@ -123,9 +143,9 @@ const equipmentOptions = computed<optionsType[]>(() => {
       label: "",
       value: "",
     };
-    const equipment = `EQ-` + idx.toString().padStart(3, "0");
-    option.label = equipment;
-    option.value = equipment;
+
+    option.label = `EQ-` + idx.toString().padStart(3, "0");
+    option.value = idx.toString();
 
     tempOptions.push(option);
   });
@@ -134,10 +154,18 @@ const equipmentOptions = computed<optionsType[]>(() => {
 });
 
 onMounted(async () => {
-  await staffStore.fetchStaff();
-
-  await activitiesStore.fetchActivities();
+  organizationStore.fetchOrganizations();
 });
+
+watch(
+  () => form.organization,
+  async () => {
+    form.activityName = "";
+    form.workerName = "";
+    await staffStore.fetchStaff(form.organization);
+    await activitiesStore.fetchActivities(form.organization);
+  },
+);
 </script>
 
 <template>
@@ -148,11 +176,22 @@ onMounted(async () => {
     :before-close="handleClose"
   >
     <el-form ref="formRef" :rules="rules" :model="form" label-width="150px">
+      <el-form-item label="Organization" prop="organization">
+        <el-select-v2 v-model="form.organization" :options="organizationOptions" />
+      </el-form-item>
       <el-form-item label="Staff Name" prop="workerName">
-        <el-select-v2 v-model="form.workerName" :options="staffOptions" />
+        <el-select-v2
+          v-model="form.workerName"
+          :options="staffOptions"
+          :disabled="form.organization.length === 0"
+        />
       </el-form-item>
       <el-form-item label="Activity" prop="activityName">
-        <el-select-v2 v-model="form.activityName" :options="activityOptions" />
+        <el-select-v2
+          v-model="form.activityName"
+          :options="activityOptions"
+          :disabled="form.organization.length === 0"
+        />
       </el-form-item>
       <el-form-item label="Equipment" prop="equipmentName">
         <el-select v-model="form.equipmentName" :options="equipmentOptions" />

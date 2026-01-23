@@ -36,7 +36,7 @@ export const useActivitiesStore = defineStore("activities", () => {
   }
 
   const fetchActivities = async (
-    organizationId?: string | string[] | undefined,
+    organizationId: string | string[] | undefined,
     activityName?: string,
   ) => {
     loading.value = true;

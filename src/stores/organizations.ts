@@ -36,22 +36,22 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   }
 
   const fetchOrganizations = async (
-    categoryId: string | string[] | undefined,
-    organizationName?: string
+    categoryId?: string | string[] | undefined,
+    organizationName?: string,
   ) => {
     loading.value = true;
 
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/organization?page=${
         currentPage.value > 1 ? currentPage.value : 1
-      }&limit=${pageSize.value * pageSizeMultiple.value}&category_id=${categoryId}${
+      }&limit=${pageSize.value * pageSizeMultiple.value}${categoryId ? `&category_id=${categoryId}` : ""}${
         organizationName ? `&search=${organizationName}` : ""
       }`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
         },
-      }
+      },
     );
 
     fetched.value = true;
@@ -71,7 +71,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } finally {
       loading.value = false;
@@ -96,7 +96,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   const updateOrganization = async (
     organizationId: string,
     category_id?: string | string[],
-    name?: string
+    name?: string,
   ) => {
     loading.value = true;
     try {
@@ -107,7 +107,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } catch (err) {
       throw Error("failed to delete organization: " + err);
@@ -127,7 +127,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   };
 
   async function findOrganization(
-    organizationID: string | LocationQueryValue[]
+    organizationID: string | LocationQueryValue[],
   ): Promise<organizationType | undefined> {
     loading.value = true;
 
@@ -138,7 +138,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
 
       return response.data;
@@ -160,6 +160,6 @@ export const useOrganizationsStore = defineStore("organizations", () => {
     fetchOrganizations,
     createOrganization,
     deleteOrganization,
-    updateOrganization
+    updateOrganization,
   };
 });

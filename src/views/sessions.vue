@@ -30,7 +30,7 @@ const handlePageChange = (page: number) => {
 onMounted(async () => {
   try {
     await sessionsStore.fetchSessions();
-  } catch (err) {
+  } catch {
     ElMessage.error("Failed to get data from server. Please try again later.");
   }
 });

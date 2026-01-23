@@ -38,7 +38,7 @@ export const useStaffStore = defineStore("staff", () => {
     }
   }
 
-  const fetchStaff = async (organizationId?: string | string[] | undefined, staffName?: string) => {
+  const fetchStaff = async (organizationId: string | string[] | undefined, staffName?: string) => {
     loading.value = true;
 
     const response = await axios.get<responseType>(
