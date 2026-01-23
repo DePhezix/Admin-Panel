@@ -23,8 +23,6 @@ const currentNavIdx = computed<number>(() => {
   ? sideNavigationArr.findIndex((item) => item === currentPath)
   : 1;
 
-  console.log(idxOfPath)
-
   return idxOfPath;
 });
 

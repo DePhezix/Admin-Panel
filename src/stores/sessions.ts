@@ -70,13 +70,81 @@ export const useSessionsStore = defineStore("sessions", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
 
       sessions.value = response.data.data;
       totalSessions.value = response.data.total;
     } catch (error) {
       console.error("Error fetching sessions:", error);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const createSessions = async (worker_id: string, activity_id: string, equipment_id: string) => {
+    loading.value = true;
+    try {
+      await axios.post(
+        "https://crm.humaid.co/api/worker-session",
+        {
+          worker_id,
+          activity_id,
+          equipment_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        },
+      );
+    } catch (err) {
+      throw Error("Failed to create sessions: " + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const deleteSession = async (sessionId: string) => {
+    loading.value = true;
+    try {
+      axios.delete(`https://crm.humaid.co/api/worker-session/${sessionId}`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+    } catch (err) {
+      throw Error("Failed to delete session: " + err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updateSession = async (
+    sessionId: string,
+    worker_id: string,
+    activity_id: string,
+    equipment_id: string,
+    active: boolean,
+  ) => {
+    loading.value = true;
+    try {
+      await axios.put(
+        `https://crm.humaid.co/api/worker-session/${sessionId}`,
+        {
+          worker_id,
+          activity_id,
+          equipment_id,
+          active,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.token}`,
+          },
+        },
+      );
+    } catch (err) {
+      throw Error("Failed to update session: " + err);
     } finally {
       loading.value = false;
     }
@@ -91,14 +159,14 @@ export const useSessionsStore = defineStore("sessions", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
 
-      sessions.value = []
+      sessions.value = [];
       sessions.value[0] = response.data;
     } catch (error) {
       console.error("Error fetching session", error);
-      sessions.value = []
+      sessions.value = [];
     } finally {
       loading.value = false;
     }
@@ -146,6 +214,9 @@ export const useSessionsStore = defineStore("sessions", () => {
     setPageSize,
     setCheckedFilters,
     fetchSessions,
-    searchSession
+    searchSession,
+    createSessions,
+    deleteSession,
+    updateSession
   };
 });

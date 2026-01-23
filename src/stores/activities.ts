@@ -36,22 +36,22 @@ export const useActivitiesStore = defineStore("activities", () => {
   }
 
   const fetchActivities = async (
-    organizationId: string | string[] | undefined,
-    activityName?: string
+    organizationId?: string | string[] | undefined,
+    activityName?: string,
   ) => {
     loading.value = true;
 
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/activity?page=${
         currentPage.value > 1 ? currentPage.value : 1
-      }&limit=${pageSize.value * pageSizeMultiple.value}&org_id=${organizationId}${
+      }&limit=${pageSize.value * pageSizeMultiple.value}${organizationId ? `&org_id=${organizationId}` : ""}${
         activityName ? `&search=${activityName}` : ""
       }`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
         },
-      }
+      },
     );
 
     fetched.value = true;
@@ -75,7 +75,7 @@ export const useActivitiesStore = defineStore("activities", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } catch (err) {
       throw Error("Failed to create activity! " + err);
@@ -114,10 +114,10 @@ export const useActivitiesStore = defineStore("activities", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } catch (err) {
-      throw Error('failed activity update: ' + err);
+      throw Error("failed activity update: " + err);
     } finally {
       loading.value = false;
     }
@@ -143,7 +143,7 @@ export const useActivitiesStore = defineStore("activities", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
 
       return response.data;
@@ -165,6 +165,6 @@ export const useActivitiesStore = defineStore("activities", () => {
     fetchActivities,
     createActivity,
     deleteActivity,
-    updateActivity
+    updateActivity,
   };
 });

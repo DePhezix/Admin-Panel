@@ -38,20 +38,20 @@ export const useStaffStore = defineStore("staff", () => {
     }
   }
 
-  const fetchStaff = async (organizationId: string | string[] | undefined, staffName?: string) => {
+  const fetchStaff = async (organizationId?: string | string[] | undefined, staffName?: string) => {
     loading.value = true;
 
     const response = await axios.get<responseType>(
       `https://crm.humaid.co/api/staff?page=${
         currentPage.value > 1 ? currentPage.value : 1
-      }&limit=${pageSize.value * pageSizeMultiple.value}&org_id=${organizationId}${
+      }&limit=${pageSize.value * pageSizeMultiple.value}${organizationId ? `&org_id=${organizationId}` : ""}${
         staffName ? `&search=${staffName}` : ""
       }`,
       {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
         },
-      }
+      },
     );
 
     fetched.value = true;
@@ -76,7 +76,7 @@ export const useStaffStore = defineStore("staff", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } catch (err) {
       throw Error("creating staff failed! " + err);
@@ -101,7 +101,12 @@ export const useStaffStore = defineStore("staff", () => {
     }
   };
 
-  const updateStaff = async (staffId: string, name?: string, surname?: string, org_id?: string | string[]) => {
+  const updateStaff = async (
+    staffId: string,
+    name?: string,
+    surname?: string,
+    org_id?: string | string[],
+  ) => {
     loading.value = true;
 
     try {
@@ -112,7 +117,7 @@ export const useStaffStore = defineStore("staff", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } catch (err) {
       throw Error("update staff failed! " + err);
@@ -160,6 +165,6 @@ export const useStaffStore = defineStore("staff", () => {
     fetchStaff,
     createStaff,
     deleteStaff,
-    updateStaff
+    updateStaff,
   };
 });

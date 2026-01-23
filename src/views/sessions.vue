@@ -15,7 +15,7 @@ watch(
   () => route.query.page,
   (newPage) => {
     sessionsStore.setCurrentPage(Number(newPage) || 1);
-  }
+  },
 );
 
 const handlePageChange = (page: number) => {
@@ -38,7 +38,12 @@ onMounted(async () => {
 
 <template>
   <div class="w-full flex flex-col items-center min-h-full">
-    <el-table v-loading="sessionsStore.loading" :data="sessionsStore.displayedSessions" show-overflow-tooltip class="w-full">
+    <el-table
+      v-loading="sessionsStore.loading"
+      :data="sessionsStore.displayedSessions"
+      show-overflow-tooltip
+      class="w-full"
+    >
       <el-table-column fixed prop="id" label="Session ID" width="180" />
       <el-table-column prop="worker.name" label="Worker" width="200" />
       <el-table-column prop="activity.name" label="Activity" width="180" />
@@ -78,11 +83,12 @@ onMounted(async () => {
       >
         <template #default="scope">
           <WorkSessionActions
-            :worker-name="scope.row.worker.name"
-            :activity-name="scope.row.activity.name"
+            :worker-name="scope.row.worker.id"
+            :activity-id="scope.row.activity.id"
             :equipment-name="scope.row.equipment_id"
             :status="scope.row.active"
             :worker-session-id="scope.row.id"
+            :activity-name="scope.row.activity.name"
           />
         </template>
       </el-table-column>
