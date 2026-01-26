@@ -51,7 +51,7 @@ const handleEditOpen = (event: Event) => {
 
 const deleteStaffActivity = () => {
   ElMessageBox.confirm(
-    `You are attempting to delete staff activity #${props.staff_activity_id}. Continue?`,
+    `You are attempting to delete a staff activity. Continue?`,
     "Warning",
     {
       confirmButtonText: "OK",

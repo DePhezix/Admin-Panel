@@ -39,7 +39,7 @@ const handleclose = () => {
 const deleteOrganization = async (e: Event) => {
   e.stopPropagation();
   ElMessageBox.confirm(
-    `You are attempting to delete organization  #${props.org_id}. Continue?`,
+    `You are attempting to delete an organization. Continue?`,
     "Warning",
     {
       confirmButtonText: "OK",

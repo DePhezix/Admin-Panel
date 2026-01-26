@@ -61,7 +61,7 @@ const handleEditConfirm = async () => {
 
 const deleteActivity = () => {
   ElMessageBox.confirm(
-    `You are attempting to delete activity  #${props.id}. Continue?`,
+    `You are attempting to delete an activity. Continue?`,
     "Warning",
     {
       confirmButtonText: "OK",

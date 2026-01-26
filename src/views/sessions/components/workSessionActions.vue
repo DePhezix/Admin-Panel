@@ -45,7 +45,7 @@ const handleClose = () => {
 
 const deleteWorkerSession = () => {
   ElMessageBox.confirm(
-    `You are attempting to delete ${props.workerName}'s work session. Continue?`,
+    `You are attempting to delete a work session. Continue?`,
     "Warning",
     {
       confirmButtonText: "OK",

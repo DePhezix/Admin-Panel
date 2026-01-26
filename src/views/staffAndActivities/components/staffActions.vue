@@ -41,7 +41,7 @@ const handleClose = () => {
 const deleteStaff = (e: Event) => {
   e.stopPropagation();
   ElMessageBox.confirm(
-    `You are attempting to delete staff #${props.worker_id}. Continue?`,
+    `You are attempting to delete a staff member. Continue?`,
     "Warning",
     {
       confirmButtonText: "OK",
