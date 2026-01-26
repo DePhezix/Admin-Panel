@@ -4,18 +4,7 @@ import { useAuthStore } from "./auth";
 import type { LocationQueryValue } from "vue-router";
 import axios from "axios";
 
-interface categoryType {
-  id: string;
-  name: string;
-  active: boolean;
-}
-
-interface responseType {
-  data: categoryType[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import type { categoriesResponseType, categoryType } from "@/types/back/categoriesResponseTypes";
 
 export const useCategoriesStore = defineStore("categories", () => {
   const categories = ref<categoryType[]>([]);
@@ -45,7 +34,7 @@ export const useCategoriesStore = defineStore("categories", () => {
   const fetchCategories = async () => {
     loading.value = true;
     try {
-      const response = await axios.get<responseType>(
+      const response = await axios.get<categoriesResponseType>(
         `https://crm.humaid.co/api/category?page=${
           currentPage.value > 1 ? currentPage.value / pageSizeMultiple.value : 1
         }&limit=${pageSize.value * pageSizeMultiple.value}${

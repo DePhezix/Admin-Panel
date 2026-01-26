@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-type sideNavigationType = "dashboard" | "categories" | "sessions" | "settings";
+import type { sideNavigationType } from "@/types/front/sideNavTypes";
 
 const sideNavigationArr: sideNavigationType[] = ["dashboard", "categories", "sessions", "settings"];
 

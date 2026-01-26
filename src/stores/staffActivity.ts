@@ -5,23 +5,11 @@ import { useAuthStore } from "./auth";
 import axios from "axios";
 import type { LocationQueryValue } from "vue-router";
 
-interface staffActivtyType {
-  id: string;
-  activity_id: string | null;
-  worker_id: string;
-  org_id: string;
-}
-
-interface responseType {
-  data: staffActivtyType[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-interface completeStaffActivityType extends staffActivtyType {
-  activity_name: string;
-}
+import type {
+  completeStaffActivityType,
+  staffActivityResponseType,
+  staffActivtyType,
+} from "@/types/back/staffActivityResponseTypes";
 
 export const useStaffActivityStore = defineStore("staffActivity", () => {
   const authStore = useAuthStore();
@@ -44,11 +32,11 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
 
   const fetchStaffActivity = async (
     organizationId: string | string[] | undefined,
-    staffId: string | string[] | undefined
+    staffId: string | string[] | undefined,
   ) => {
     loading.value = true;
 
-    const response = await axios.get<responseType>(
+    const response = await axios.get<staffActivityResponseType>(
       `https://crm.humaid.co/api/staff-activity?page=${
         currentPage.value > 1 ? currentPage.value : 1
       }&limit=${
@@ -58,7 +46,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
         },
-      }
+      },
     );
 
     loading.value = false;
@@ -92,7 +80,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
   const createStaffActivity = async (
     activity_id: string,
     worker_id?: string | string[],
-    org_id?: string | string[]
+    org_id?: string | string[],
   ) => {
     loading.value = true;
     try {
@@ -107,7 +95,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } catch (err) {
       throw Error("Failed to create staff activity! " + err);
@@ -136,7 +124,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     staffActivityId: string,
     activity_id?: string,
     worker_id?: string | string[],
-    org_id?: string | string[]
+    org_id?: string | string[],
   ) => {
     loading.value = true;
 
@@ -152,7 +140,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
     } catch (err) {
       throw Error("Failed to delete! " + err);
@@ -172,7 +160,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
   };
 
   async function findStaffActivity(
-    staffActivityID: string | LocationQueryValue[]
+    staffActivityID: string | LocationQueryValue[],
   ): Promise<staffActivtyType | undefined> {
     loading.value = true;
 
@@ -183,7 +171,7 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
 
       return response.data;
@@ -204,6 +192,6 @@ export const useStaffActivityStore = defineStore("staffActivity", () => {
     fetchStaffActivity,
     createStaffActivity,
     deleteStaffActivity,
-    updateStaffActivity
+    updateStaffActivity,
   };
 });

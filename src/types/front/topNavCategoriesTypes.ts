@@ -1,0 +1,1 @@
+export type navigationType = "Categories" | "Organization" | "Staff" | "Activity" | "Staff Activity";

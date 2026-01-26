@@ -4,20 +4,7 @@ import { useAuthStore } from "./auth";
 import axios from "axios";
 
 import type { LocationQueryValue } from "vue-router";
-
-interface staffType {
-  id: string;
-  name: string;
-  surname: string;
-  org_id: string;
-}
-
-interface responseType {
-  data: staffType[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import type { staffResponseType, staffType } from "@/types/back/staffResponseTypes";
 
 export const useStaffStore = defineStore("staff", () => {
   const authStore = useAuthStore();
@@ -41,7 +28,7 @@ export const useStaffStore = defineStore("staff", () => {
   const fetchStaff = async (organizationId: string | string[] | undefined, staffName?: string) => {
     loading.value = true;
 
-    const response = await axios.get<responseType>(
+    const response = await axios.get<staffResponseType>(
       `https://crm.humaid.co/api/staff?page=${
         currentPage.value > 1 ? currentPage.value : 1
       }&limit=${pageSize.value * pageSizeMultiple.value}${organizationId ? `&org_id=${organizationId}` : ""}${

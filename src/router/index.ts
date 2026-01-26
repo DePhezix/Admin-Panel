@@ -1,13 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import Cookies from "js-cookie";
-import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
 
 const routes = [
   {
     path: "/login",
     name: "login",
-    component: () => import("@/views/login.vue"),
+    component: () => import("@/views/auth/index.vue"),
   },
   {
     path: "/",
@@ -18,17 +17,17 @@ const routes = [
       {
         path: "dashboard",
         name: "dashboard",
-        component: () => import("@/views/dashboard.vue"),
+        component: () => import("@/views/dashboard/index.vue"),
       },
       {
         path: "settings",
         name: "settings",
-        component: () => import("@/views/settings.vue"),
+        component: () => import("@/views/settings/index.vue"),
       },
       {
         path: "sessions",
         name: "sessions",
-        component: () => import("@/views/sessions.vue"),
+        component: () => import("@/views/sessions/index.vue"),
       },
       {
         path: "categories",
@@ -36,29 +35,24 @@ const routes = [
           {
             path: "",
             name: "categories",
-            component: () => import("@/views/categories.vue"),
+            component: () => import("@/views/categories/index.vue"),
           },
           {
             path: ":categoryId",
             name: "organizations",
-            component: () => import("@/views/organizations.vue"),
+            component: () => import("@/views/organizations/index.vue"),
           },
           {
             path: ":categoryId/organizations/:organizationId",
             name: "staff_and_activities",
-            component: () => import("@/views/staffAndActivities.vue"),
+            component: () => import("@/views/staffAndActivities/index.vue"),
           },
           {
             path: ":categoryId/organization/:organizationId/staff/:staffId",
             name: "staff_activities",
-            component: () => import("@/views/staffActivities.vue")
+            component: () => import("@/views/staffActivities/index.vue"),
           },
         ],
-      },
-      {
-        path: "equipment",
-        name: "equipment",
-        component: () => import("@/views/healthCheck.vue"),
       },
     ],
   },

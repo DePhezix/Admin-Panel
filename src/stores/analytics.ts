@@ -3,27 +3,10 @@ import { reactive, computed, ref } from "vue";
 import axios from "axios";
 import { useAuthStore } from "./auth";
 
-interface responseDataType {
-  organizations: {
-    total_org: number;
-    covered_org: number;
-  };
-  workers: {
-    total_worker: number;
-    covered_worker: number;
-  };
-  agents: {
-    total_agent: number;
-    covered_agent: number;
-  };
-  activities: {
-    total_activity: number;
-    covered_activity: number;
-  };
-}
+import type { analayticsResponseType } from "@/types/back/analyticsResponseTypes";
 
 export const useAnalyticsStore = defineStore("analytics", () => {
-  const analytics = reactive<responseDataType>({
+  const analytics = reactive<analayticsResponseType>({
     organizations: {
       total_org: 0,
       covered_org: 0,
@@ -48,7 +31,7 @@ export const useAnalyticsStore = defineStore("analytics", () => {
   const fetchAnalytics = async () => {
     loading.value = true;
     try {
-      const response = await axios.get<responseDataType>(
+      const response = await axios.get<analayticsResponseType>(
         "https://crm.humaid.co/api/analytics/general-stats",
         {
           headers: {

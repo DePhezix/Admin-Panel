@@ -4,23 +4,7 @@ import { sha256 } from "js-sha256";
 import Cookies from "js-cookie";
 import axios from "axios";
 
-type userTypes = "admin" | "agent" | "other" | null;
-
-interface loginResponse {
-  access_token: string;
-  expired_at: string;
-}
-
-interface userData {
-  id: string | null;
-  name: string | null;
-  email: string | null;
-  role: userTypes | null;
-  surname: string | null;
-  created_at: string | null;
-  email_verified: boolean | null;
-  language: string | null;
-}
+import type { userData, loginResponse } from "@/types/back/authResponseTypes";
 
 export const useAuthStore = defineStore("auth", () => {
   const hash = sha256.create();
@@ -55,7 +39,7 @@ export const useAuthStore = defineStore("auth", () => {
             headers: {
               Authorization: `Bearer ${token.value}`,
             },
-          }
+          },
         );
 
         Object.assign(userData, userDataResponse.data);
@@ -87,7 +71,7 @@ export const useAuthStore = defineStore("auth", () => {
           headers: {
             Authorization: `Bearer ${token.value}`,
           },
-        }
+        },
       );
 
       Object.assign(userData, userResponseData.data);
@@ -107,7 +91,7 @@ export const useAuthStore = defineStore("auth", () => {
     Cookies.remove("token");
   }
 
-return {
+  return {
     isAuthenticated,
     userData,
     token,

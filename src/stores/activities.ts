@@ -3,18 +3,7 @@ import { ref, computed } from "vue";
 import { useAuthStore } from "./auth";
 import axios from "axios";
 
-interface activityType {
-  id: string;
-  name: string;
-  org_id: string;
-}
-
-interface responseType {
-  data: activityType[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import type { activityResponseType, activityType } from "@/types/back/activityResponseTypes";
 
 export const useActivitiesStore = defineStore("activities", () => {
   const authStore = useAuthStore();
@@ -41,7 +30,7 @@ export const useActivitiesStore = defineStore("activities", () => {
   ) => {
     loading.value = true;
 
-    const response = await axios.get<responseType>(
+    const response = await axios.get<activityResponseType>(
       `https://crm.humaid.co/api/activity?page=${
         currentPage.value > 1 ? currentPage.value : 1
       }&limit=${pageSize.value * pageSizeMultiple.value}${organizationId ? `&org_id=${organizationId}` : ""}${

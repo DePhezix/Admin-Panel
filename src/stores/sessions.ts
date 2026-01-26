@@ -3,38 +3,12 @@ import { ref, computed, watch } from "vue";
 import { useAuthStore } from "./auth";
 import axios from "axios";
 
-interface workerSessionType {
-  id: string;
-  worker: {
-    id: string;
-    name: string;
-    surname: string;
-  };
-  activity: {
-    id: string;
-    name: string;
-  };
-  equipment_id: string;
-  agent: {
-    id: string;
-    name: string;
-    surname: string;
-  };
-  active: boolean;
-  created_at: Date;
-}
-
-interface responseType {
-  data: workerSessionType[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import type { sessionsResponseType, sessionType } from "@/types/back/sessionsResponseTypes";
 
 export const useSessionsStore = defineStore("sessions", () => {
   const authStore = useAuthStore();
 
-  const sessions = ref<workerSessionType[]>([]);
+  const sessions = ref<sessionType[]>([]);
 
   const loading = ref<boolean>(true);
 
@@ -58,7 +32,7 @@ export const useSessionsStore = defineStore("sessions", () => {
   const fetchSessions = async () => {
     loading.value = true;
     try {
-      const response = await axios.get<responseType>(
+      const response = await axios.get<sessionsResponseType>(
         `https://crm.humaid.co/api/worker-session?page=${
           currentPage.value > 1 ? currentPage.value / pageSizeMultiple.value : 1
         }&limit=${pageSize.value * pageSizeMultiple.value}${
@@ -153,7 +127,7 @@ export const useSessionsStore = defineStore("sessions", () => {
   const searchSession = async (searchID: string) => {
     loading.value = true;
     try {
-      const response = await axios.get<workerSessionType>(
+      const response = await axios.get<sessionType>(
         `https://crm.humaid.co/api/worker-session/${searchID}`,
         {
           headers: {

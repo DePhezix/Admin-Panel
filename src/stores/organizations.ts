@@ -4,17 +4,10 @@ import { useAuthStore } from "./auth";
 import type { LocationQueryValue } from "vue-router";
 import axios from "axios";
 
-interface organizationType {
-  id: string;
-  name: string;
-}
-
-interface responseType {
-  data: organizationType[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import type {
+  organizationResponseType,
+  organizationType,
+} from "@/types/back/organizationResponseType";
 
 export const useOrganizationsStore = defineStore("organizations", () => {
   const authStore = useAuthStore();
@@ -41,7 +34,7 @@ export const useOrganizationsStore = defineStore("organizations", () => {
   ) => {
     loading.value = true;
 
-    const response = await axios.get<responseType>(
+    const response = await axios.get<organizationResponseType>(
       `https://crm.humaid.co/api/organization?page=${
         currentPage.value > 1 ? currentPage.value : 1
       }&limit=${pageSize.value * pageSizeMultiple.value}${categoryId ? `&category_id=${categoryId}` : ""}${
