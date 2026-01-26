@@ -61,7 +61,11 @@ onMounted(async () => {
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column prop="agent.name" label="Agent" width="180" />
+      <el-table-column prop="agent.name" label="Agent" width="180" >
+        <template #default="scope">
+          {{ scope.row.agent.name }} {{ scope.row.agent.surname }}
+        </template>
+      </el-table-column>
       <el-table-column prop="active" label="Status" width="180">
         <template #default="scope">
           <el-tag :type="scope.row.active ? 'success' : 'danger'" disable-transitions>
