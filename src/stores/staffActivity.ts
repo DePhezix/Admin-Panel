@@ -1,15 +1,14 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { useActivitiesStore } from "./activities";
-import { useAuthStore } from "./auth";
+import { useAuthStore, useActivitiesStore } from "./index";
 import axios from "axios";
-import type { LocationQueryValue } from "vue-router";
 
+import type { LocationQueryValue } from "vue-router";
 import type {
   completeStaffActivityType,
   staffActivityResponseType,
   staffActivtyType,
-} from "@/types/back/staffActivityResponseTypes";
+} from "@/types/backend/index";
 
 export const useStaffActivityStore = defineStore("staffActivity", () => {
   const authStore = useAuthStore();

@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, reactive } from "vue";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useStaffStore } from "@/stores/staff";
-import { useActivitiesStore } from "@/stores/activities";
-import { useStaffActivityStore } from "@/stores/staffActivity";
+import {
+  useOrganizationsStore,
+  useStaffStore,
+  useActivitiesStore,
+  useStaffActivityStore,
+} from "@/stores/index";
 import { useRoute } from "vue-router";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { staffActivityFormType } from "@/types/front/staffActivityTypes";
+import type { optionsType, staffActivityFormType } from "@/types/frontend/index";
 
 const dialogVisible = defineModel();
 
@@ -52,7 +53,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         await staffActivityStore.createStaffActivity(
           form.activityName,
           form.workerName,
-          form.orgName
+          form.orgName,
         );
 
         ElMessage({
@@ -64,7 +65,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
         await staffActivityStore.fetchStaffActivity(
           route.params.organizationId,
-          route.params.staffId
+          route.params.staffId,
         );
       } catch {
         ElMessage.error("Failed to create staff activity!");

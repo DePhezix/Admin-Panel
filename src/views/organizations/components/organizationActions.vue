@@ -4,11 +4,9 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, EditPen } from "@element-plus/icons-vue";
 
 import { useRoute } from "vue-router";
-import { useCategoriesStore } from "@/stores/categories";
-import { useOrganizationsStore } from "@/stores/organizations";
+import { useCategoriesStore, useOrganizationsStore } from "@/stores/index";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { organizationFormType } from "@/types/front/organizationTypes";
+import type { optionsType, organizationFormType } from "@/types/frontend/index";
 
 const props = defineProps({
   name: String,
@@ -38,15 +36,11 @@ const handleclose = () => {
 
 const deleteOrganization = async (e: Event) => {
   e.stopPropagation();
-  ElMessageBox.confirm(
-    `You are attempting to delete an organization. Continue?`,
-    "Warning",
-    {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    },
-  )
+  ElMessageBox.confirm(`You are attempting to delete an organization. Continue?`, "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  })
     .then(async () => {
       if (props.org_id) {
         try {

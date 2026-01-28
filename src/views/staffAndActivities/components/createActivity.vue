@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, reactive } from "vue";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useActivitiesStore } from "@/stores/activities";
+import { useOrganizationsStore, useActivitiesStore } from "@/stores/index";
 import { useRoute } from "vue-router";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { activityFormType } from "@/types/front/activityTypes";
+import type { optionsType, activityFormType } from "@/types/frontend/index";
 
 const dialogVisible = defineModel();
 

@@ -2,10 +2,7 @@
 import { ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { useStaffActivityStore } from "@/stores/staffActivity";
-import { useStaffStore } from "@/stores/staff";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useAuthStore } from "@/stores/auth";
+import { useStaffActivityStore, useStaffStore, useOrganizationsStore, useAuthStore } from "@/stores/index";
 
 import StaffActivityActions from "./components/staffActivityActions.vue";
 

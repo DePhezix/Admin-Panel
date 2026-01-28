@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { reactive, computed, ref } from "vue";
 import axios from "axios";
-import { useAuthStore } from "./auth";
+import { useAuthStore } from "./index";
 
-import type { analayticsResponseType } from "@/types/back/analyticsResponseTypes";
+import type { analayticsResponseType } from "@/types/backend/index";
 
 export const useAnalyticsStore = defineStore("analytics", () => {
   const analytics = reactive<analayticsResponseType>({
@@ -37,7 +37,7 @@ export const useAnalyticsStore = defineStore("analytics", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
 
       Object.assign(analytics, response.data);
@@ -57,7 +57,7 @@ export const useAnalyticsStore = defineStore("analytics", () => {
       analytics.organizations.covered_org +
       analytics.workers.covered_worker +
       analytics.agents.covered_agent +
-      analytics.activities.covered_activity
+      analytics.activities.covered_activity,
   );
 
   const totalItems = computed(
@@ -65,11 +65,11 @@ export const useAnalyticsStore = defineStore("analytics", () => {
       analytics.organizations.total_org +
       analytics.workers.total_worker +
       analytics.agents.total_agent +
-      analytics.activities.total_activity
+      analytics.activities.total_activity,
   );
 
   const overallCoverage = computed(() =>
-    parseFloat(calculatePercentage(totalCovered.value, totalItems.value))
+    parseFloat(calculatePercentage(totalCovered.value, totalItems.value)),
   );
 
   return {

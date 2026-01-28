@@ -4,7 +4,7 @@ import { sha256 } from "js-sha256";
 import Cookies from "js-cookie";
 import axios from "axios";
 
-import type { userData, loginResponse } from "@/types/back/authResponseTypes";
+import type { userData, loginResponse } from "@/types/backend/index";
 
 export const useAuthStore = defineStore("auth", () => {
   const hash = sha256.create();

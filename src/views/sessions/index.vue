@@ -2,7 +2,7 @@
 import { watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import WorkSessionActions from "./components/workSessionActions.vue";
-import { useSessionsStore } from "@/stores/sessions";
+import { useSessionsStore } from "@/stores/index";
 import { ElMessage } from "element-plus";
 
 const router = useRouter();

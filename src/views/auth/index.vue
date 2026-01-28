@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/index";
 import { ElMessage } from "element-plus";
 
 import type { FormInstance, FormRules } from "element-plus";
 import { Lock, Message } from "@element-plus/icons-vue";
 
-import type { LoginForm } from "@/types/front/authTypes";
+import type { LoginForm } from "@/types/frontend/index";
 
 const router = useRouter();
 const authStore = useAuthStore();

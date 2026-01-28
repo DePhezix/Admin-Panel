@@ -3,11 +3,9 @@ import { computed, onMounted, ref, reactive } from "vue";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 
 import { useRoute } from "vue-router";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useStaffStore } from "@/stores/staff";
+import { useOrganizationsStore, useStaffStore } from "@/stores/index";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { staffFormType } from "@/types/front/staffTypes";
+import type { optionsType, staffFormType } from "@/types/frontend/index";
 
 const dialogVisible = defineModel();
 

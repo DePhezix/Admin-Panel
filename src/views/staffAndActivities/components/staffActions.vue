@@ -4,11 +4,9 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, EditPen } from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
 
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useStaffStore } from "@/stores/staff";
+import { useOrganizationsStore, useStaffStore } from "@/stores/index";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { staffFormType } from "@/types/front/staffTypes";
+import type { optionsType, staffFormType } from "@/types/frontend/index";
 
 const props = defineProps({
   worker_id: String,
@@ -40,15 +38,11 @@ const handleClose = () => {
 
 const deleteStaff = (e: Event) => {
   e.stopPropagation();
-  ElMessageBox.confirm(
-    `You are attempting to delete a staff member. Continue?`,
-    "Warning",
-    {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    }
-  )
+  ElMessageBox.confirm(`You are attempting to delete a staff member. Continue?`, "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  })
     .then(async () => {
       if (props.worker_id) {
         try {
@@ -85,7 +79,7 @@ const handleEditConfirm = async () => {
         props.worker_id,
         form.workerName,
         form.workerSurname,
-        form.orgName
+        form.orgName,
       );
       editOpen.value = false;
       ElMessage({

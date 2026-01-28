@@ -4,13 +4,14 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { EditPen, Delete } from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
 
-import { useStaffStore } from "@/stores/staff";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useStaffActivityStore } from "@/stores/staffActivity";
-import { useActivitiesStore } from "@/stores/activities";
+import {
+  useStaffStore,
+  useOrganizationsStore,
+  useStaffActivityStore,
+  useActivitiesStore,
+} from "@/stores/index";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { staffActivityFormType } from "@/types/front/staffActivityTypes";
+import type { optionsType, staffActivityFormType } from "@/types/frontend/index";
 
 const props = defineProps({
   staff_activity_id: String,
@@ -50,15 +51,11 @@ const handleEditOpen = (event: Event) => {
 };
 
 const deleteStaffActivity = () => {
-  ElMessageBox.confirm(
-    `You are attempting to delete a staff activity. Continue?`,
-    "Warning",
-    {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    }
-  )
+  ElMessageBox.confirm(`You are attempting to delete a staff activity. Continue?`, "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  })
     .then(async () => {
       if (props.staff_activity_id) {
         try {
@@ -71,7 +68,7 @@ const deleteStaffActivity = () => {
 
           await staffActivityStore.fetchStaffActivity(
             route.params.organizationId,
-            route.params.staffId
+            route.params.staffId,
           );
         } catch {
           ElMessage.error("Failed to delete staff activity");
@@ -93,7 +90,7 @@ const handleEditConfirm = async () => {
         props.staff_activity_id,
         form.activityName,
         form.workerName,
-        form.orgName
+        form.orgName,
       );
       editOpen.value = false;
       ElMessage({
@@ -103,7 +100,7 @@ const handleEditConfirm = async () => {
 
       await staffActivityStore.fetchStaffActivity(
         route.params.organizationId,
-        route.params.staffId
+        route.params.staffId,
       );
     } catch {
       ElMessage.error("Failed to update staff activity");

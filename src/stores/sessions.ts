@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
-import { useAuthStore } from "./auth";
+import { useAuthStore } from "./index";
 import axios from "axios";
 
-import type { sessionsResponseType, sessionType } from "@/types/back/sessionsResponseTypes";
+import type { sessionsResponseType, sessionType } from "@/types/backend/index";
 
 export const useSessionsStore = defineStore("sessions", () => {
   const authStore = useAuthStore();
@@ -191,6 +191,6 @@ export const useSessionsStore = defineStore("sessions", () => {
     searchSession,
     createSessions,
     deleteSession,
-    updateSession
+    updateSession,
   };
 });

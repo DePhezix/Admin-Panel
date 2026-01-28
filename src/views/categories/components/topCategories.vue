@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { useAuthStore } from "@/stores/auth";
 import { useRoute } from "vue-router";
 import { watch, ref, computed, defineAsyncComponent } from "vue";
 import { ArrowRight } from "@element-plus/icons-vue";
 import { useDebounceFn } from "@vueuse/core";
-import { useCategoriesStore } from "@/stores/categories";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useStaffStore } from "@/stores/staff";
-import { useActivitiesStore } from "@/stores/activities";
+
+import {
+  useCategoriesStore,
+  useAuthStore,
+  useOrganizationsStore,
+  useStaffStore,
+  useActivitiesStore,
+} from "@/stores/index";
 
 import { type CheckboxValueType } from "element-plus";
-import type { navigationType } from "@/types/front/topNavCategoriesTypes";
+import type { navigationType } from "@/types/frontend/index";
 
 const dialogComponents: Partial<Record<navigationType, ReturnType<typeof defineAsyncComponent>>> = {
   Organization: defineAsyncComponent(

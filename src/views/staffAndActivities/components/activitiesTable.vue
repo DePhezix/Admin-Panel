@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
-import { useActivitiesStore } from "@/stores/activities";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useAuthStore } from "@/stores/auth";
+import { useActivitiesStore, useOrganizationsStore, useAuthStore } from "@/stores/index";
 import { useRoute, useRouter } from "vue-router";
 import ActivityActions from "./activityActions.vue";
 

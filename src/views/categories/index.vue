@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { watch, onMounted } from "vue";
-import { useCategoriesStore } from "@/stores/categories";
+import { useCategoriesStore } from "@/stores/index";
 import { useRoute, useRouter } from "vue-router";
 
-import type { rowEvent } from "@/types/front/generalTypes";
+import type { rowEvent } from "@/types/frontend/index";
 
 const route = useRoute();
 const router = useRouter();
@@ -15,7 +15,7 @@ watch(
   () => route.query.page,
   (newPage) => {
     categoriesStore.setCurrentPage(Number(newPage) || 1);
-  }
+  },
 );
 
 const handlePageChange = (page: number) => {

@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import { onMounted, computed, ref, reactive } from "vue";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useCategoriesStore } from "@/stores/categories";
+import { useCategoriesStore, useOrganizationsStore } from "@/stores/index";
 import { ElMessage } from "element-plus";
 import { useRoute } from "vue-router";
 
 import type { FormInstance, FormRules } from "element-plus";
-import type { optionsType } from "@/types/front/generalTypes";
-import type { organizationFormType } from "@/types/front/organizationTypes";
+import type { optionsType, organizationFormType } from "@/types/frontend/index";
 
 const dialogVisible = defineModel();
 
 const organizationStore = useOrganizationsStore();
 const categoriesStore = useCategoriesStore();
-
 
 const route = useRoute();
 

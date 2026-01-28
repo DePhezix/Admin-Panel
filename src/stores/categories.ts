@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
 import { watch, ref, computed } from "vue";
-import { useAuthStore } from "./auth";
-import type { LocationQueryValue } from "vue-router";
+import { useAuthStore } from "./index";
 import axios from "axios";
 
-import type { categoriesResponseType, categoryType } from "@/types/back/categoriesResponseTypes";
+import type { LocationQueryValue } from "vue-router";
+import type { categoriesResponseType, categoryType } from "@/types/backend/index";
 
 export const useCategoriesStore = defineStore("categories", () => {
   const categories = ref<categoryType[]>([]);
@@ -46,7 +46,7 @@ export const useCategoriesStore = defineStore("categories", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
 
       fetched.value = true;
@@ -70,7 +70,7 @@ export const useCategoriesStore = defineStore("categories", () => {
   };
 
   async function findCategory(
-    categoryID: string | LocationQueryValue[]
+    categoryID: string | LocationQueryValue[],
   ): Promise<categoryType | undefined> {
     loading.value = true;
     try {
@@ -80,7 +80,7 @@ export const useCategoriesStore = defineStore("categories", () => {
           headers: {
             Authorization: `Bearer ${authStore.token}`,
           },
-        }
+        },
       );
       return response.data;
     } finally {

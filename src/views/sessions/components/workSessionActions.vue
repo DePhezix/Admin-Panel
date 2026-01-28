@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { watch, computed, reactive, ref } from "vue";
-import { useStaffStore } from "@/stores/staff";
-import { useSessionsStore } from "@/stores/sessions";
-import { useStaffActivityStore } from "@/stores/staffActivity";
+import { useStaffActivityStore, useStaffStore, useSessionsStore } from "@/stores/index";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, EditPen } from "@element-plus/icons-vue";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { editSessionFormType } from "@/types/front/sessionsTypes";
+import type { optionsType, editSessionFormType } from "@/types/frontend/index";
 
 const props = defineProps({
   workerSessionId: String,
@@ -44,15 +41,11 @@ const handleClose = () => {
 };
 
 const deleteWorkerSession = () => {
-  ElMessageBox.confirm(
-    `You are attempting to delete a work session. Continue?`,
-    "Warning",
-    {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    },
-  )
+  ElMessageBox.confirm(`You are attempting to delete a work session. Continue?`, "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  })
     .then(async () => {
       try {
         if (props.workerSessionId) {

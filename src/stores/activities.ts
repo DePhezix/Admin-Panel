@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { useAuthStore } from "./auth";
+import { useAuthStore } from "./index";
 import axios from "axios";
 
-import type { activityResponseType, activityType } from "@/types/back/activityResponseTypes";
+import type { activityResponseType, activityType } from "@/types/backend/index";
 
 export const useActivitiesStore = defineStore("activities", () => {
   const authStore = useAuthStore();

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { watch, onMounted, computed, ref, reactive } from "vue";
-import { useStaffStore } from "@/stores/staff";
-import { useSessionsStore } from "@/stores/sessions";
-import { useStaffActivityStore } from "@/stores/staffActivity";
-import { useOrganizationsStore } from "@/stores/organizations";
+import {
+  useStaffStore,
+  useSessionsStore,
+  useStaffActivityStore,
+  useOrganizationsStore,
+} from "@/stores/index";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { createSessionFormType } from "@/types/front/sessionsTypes";
+import type { optionsType, createSessionFormType } from "@/types/frontend/index";
 
 const dialogVisible = defineModel();
 

@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
-import { useStaffStore } from "@/stores/staff";
-import { useAuthStore } from "@/stores/auth";
-import { useOrganizationsStore } from "@/stores/organizations";
+import { useStaffStore, useOrganizationsStore, useAuthStore } from "@/stores/index";
 import { useRoute, useRouter } from "vue-router";
 import StaffActions from "./staffActions.vue";
 
-import type { rowEvent } from "@/types/front/generalTypes";
+import type { rowEvent } from "@/types/frontend/index";
 
 const route = useRoute();
 const router = useRouter();
@@ -22,7 +20,7 @@ watch(
   () => route.query.page,
   (newPage) => {
     staffStore.setCurrentPage(Number(newPage) || 1);
-  }
+  },
 );
 
 onMounted(async () => {

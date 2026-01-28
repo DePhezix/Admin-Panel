@@ -2,7 +2,7 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import type { sideNavigationType } from "@/types/front/sideNavTypes";
+import type { sideNavigationType } from "@/types/frontend/index";
 
 const sideNavigationArr: sideNavigationType[] = ["dashboard", "categories", "sessions", "settings"];
 

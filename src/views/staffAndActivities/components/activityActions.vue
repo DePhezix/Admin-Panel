@@ -2,12 +2,10 @@
 import { computed, ref, reactive } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { EditPen, Delete } from "@element-plus/icons-vue";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useActivitiesStore } from "@/stores/activities";
+import { useOrganizationsStore, useActivitiesStore } from "@/stores/index";
 import { useRoute } from "vue-router";
 
-import type { optionsType } from "@/types/front/generalTypes";
-import type { activityFormType } from "@/types/front/activityTypes";
+import type { optionsType, activityFormType } from "@/types/frontend/index";
 
 const props = defineProps({
   name: String,
@@ -60,15 +58,11 @@ const handleEditConfirm = async () => {
 };
 
 const deleteActivity = () => {
-  ElMessageBox.confirm(
-    `You are attempting to delete an activity. Continue?`,
-    "Warning",
-    {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
-      type: "warning",
-    }
-  )
+  ElMessageBox.confirm(`You are attempting to delete an activity. Continue?`, "Warning", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
+    type: "warning",
+  })
     .then(async () => {
       if (props.id) {
         try {
@@ -132,7 +126,9 @@ const options = computed<optionsType[]>(() => {
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">Cancel</el-button>
-        <el-button type="primary" @click="handleEditConfirm" :loading="activitiesStore.loading"> Confirm </el-button>
+        <el-button type="primary" @click="handleEditConfirm" :loading="activitiesStore.loading">
+          Confirm
+        </el-button>
       </div>
     </template>
   </el-dialog>

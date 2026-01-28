@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "@/stores/auth";
-import { useSessionsStore } from "@/stores/sessions";
+import { useSessionsStore, useAuthStore } from "@/stores/index";
 import { ref, computed, defineAsyncComponent } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { type CheckboxValueType } from "element-plus";

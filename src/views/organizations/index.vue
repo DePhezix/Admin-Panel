@@ -1,12 +1,10 @@
 <script async setup lang="ts">
 import { ref, watch, onMounted } from "vue";
-import { useOrganizationsStore } from "@/stores/organizations";
-import { useCategoriesStore } from "@/stores/categories";
-import { useAuthStore } from "@/stores/auth";
+import { useOrganizationsStore, useCategoriesStore, useAuthStore } from "@/stores/index";
 import { useRoute, useRouter } from "vue-router";
 import OrganizationActions from "./components/organizationActions.vue";
 
-import type { rowEvent } from "@/types/front/generalTypes";
+import type { rowEvent } from "@/types/frontend/index";
 
 const route = useRoute();
 const router = useRouter();
@@ -22,7 +20,7 @@ watch(
   () => route.query.page,
   (newPage) => {
     orgazinationsStore.setCurrentPage(Number(newPage) || 1);
-  }
+  },
 );
 
 onMounted(async () => {

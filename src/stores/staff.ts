@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { useAuthStore } from "./auth";
+import { useAuthStore } from "./index";
 import axios from "axios";
 
 import type { LocationQueryValue } from "vue-router";
-import type { staffResponseType, staffType } from "@/types/back/staffResponseTypes";
+import type { staffResponseType, staffType } from "@/types/backend/index";
 
 export const useStaffStore = defineStore("staff", () => {
   const authStore = useAuthStore();

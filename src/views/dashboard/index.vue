@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
-import { useAnalyticsStore } from "@/stores/analytics";
+import { useAnalyticsStore } from "@/stores/index";
 import {
   OfficeBuilding,
   User,
@@ -11,7 +11,7 @@ import {
   Grid,
 } from "@element-plus/icons-vue";
 
-import type { dashboardCardType } from "@/types/front/dashboardTypes";
+import type { dashboardCardType } from "@/types/frontend/index";
 
 const analyticsStore = useAnalyticsStore();
 
