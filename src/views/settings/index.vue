@@ -55,7 +55,7 @@ const logOut = () => {
         <template #default>
           <el-descriptions label-width="150" :column="2" border>
             <el-descriptions-item label="ID">
-              {{ userInfo.id }}
+              #{{ userInfo.id }}
             </el-descriptions-item>
 
             <el-descriptions-item label="Name">
@@ -79,7 +79,7 @@ const logOut = () => {
             </el-descriptions-item>
 
             <el-descriptions-item label="Language">
-              {{ userInfo.language }}
+              {{ userInfo.language === 'en' ? 'English' : 'Russian' }}
             </el-descriptions-item>
 
             <el-descriptions-item label="Created At">
