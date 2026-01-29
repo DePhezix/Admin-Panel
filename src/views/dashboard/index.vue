@@ -58,7 +58,7 @@ const cards = computed<dashboardCardType[]>(() => [
 <template>
   <div>
     <div class="flex flex-col w-full gap-[20px]">
-      <el-row :gutter="24">
+      <el-row :gutter="24" class="gap-y-[20px]">
         <el-col :xs="24" :sm="12" :lg="6" v-for="card in cards" :key="card.title">
           <el-card shadow="hover" :body-style="{ padding: '24px' }">
             <el-skeleton :loading="analyticsStore.loading" animated>
@@ -127,7 +127,7 @@ const cards = computed<dashboardCardType[]>(() => [
           </template>
           <template #default>
             <el-row :gutter="24">
-              <el-col :xs="12" :md="6">
+              <el-col :xs="12" :sm="6">
                 <el-statistic title="Total Covered" :value="analyticsStore.totalCovered">
                   <template #prefix>
                     <el-icon style="color: #67c23a" class="translate-y-[3px]">
@@ -136,7 +136,7 @@ const cards = computed<dashboardCardType[]>(() => [
                   </template>
                 </el-statistic>
               </el-col>
-              <el-col :xs="12" :md="6">
+              <el-col :xs="12" :sm="6">
                 <el-statistic title="Total Items" :value="analyticsStore.totalItems">
                   <template #prefix>
                     <el-icon style="color: #409eff" class="translate-y-[3px]">
@@ -145,7 +145,7 @@ const cards = computed<dashboardCardType[]>(() => [
                   </template>
                 </el-statistic>
               </el-col>
-              <el-col :xs="12" :md="6">
+              <el-col :xs="12" :sm="6">
                 <el-statistic
                   title="Overall Coverage"
                   :value="analyticsStore.overallCoverage"
@@ -159,7 +159,7 @@ const cards = computed<dashboardCardType[]>(() => [
                   </template>
                 </el-statistic>
               </el-col>
-              <el-col :xs="12" :md="6">
+              <el-col :xs="12" :sm="6">
                 <el-statistic title="Categories" :value="4">
                   <template #prefix>
                     <el-icon style="color: #9c27b0" class="translate-y-[3px]">
