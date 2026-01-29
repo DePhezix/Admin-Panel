@@ -29,13 +29,14 @@ const handleChange = (newNavIdx: string) => {
 };
 </script>
 <template>
-  <el-aside :class="{ '!w-min': collapsedNav }">
+  <el-aside width="auto">
     <el-scrollbar>
       <el-menu
-        class="h-screen flex flex-col"
+        class="h-screen"
         :collapse="collapsedNav"
         :default-active="String(currentNavIdx)"
         @select="handleChange"
+        collapse-transition
       >
         <h1
           class="flex justify-between px-[20px] py-[10px] items-center"
@@ -46,7 +47,7 @@ const handleChange = (newNavIdx: string) => {
             ><Fold v-if="!collapsedNav" /><Expand v-else
           /></el-icon>
         </h1>
-        <div class="flex-1">
+        <div>
           <el-menu-item index="0">
             <el-icon><DataLine /></el-icon>
             <template #title>Dashboard</template>
@@ -59,8 +60,13 @@ const handleChange = (newNavIdx: string) => {
             <el-icon><Suitcase /></el-icon>
             <template #title>Sessions</template>
           </el-menu-item>
+          <el-menu-item class="pointer-events-none">
+            <template #title>
+              <div class="w-[200px]" />
+            </template>
+          </el-menu-item>
         </div>
-        <el-menu-item index="3">
+        <el-menu-item index="3" class="!absolute bottom-[0] w-full">
           <el-icon><setting /></el-icon><template #title>Settings</template></el-menu-item
         >
       </el-menu>
